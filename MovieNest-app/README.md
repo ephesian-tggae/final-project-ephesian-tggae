@@ -6,13 +6,13 @@ Community movie platform: track watchlists and watch history, write reviews, and
 
 | Path | Description |
 |------|-------------|
-| [`backend/MovieNest.Api/`](backend/MovieNest.Api/) | ASP.NET Core (.NET 10) API |
+| [`backend/`](backend/) | ASP.NET Core (.NET 10) API |
 | [`docs/`](docs/) | Project documentation (prompt log, architecture, etc.) |
 | [`PRODUCT_BRIEF.md`](PRODUCT_BRIEF.md) | Product brief (Milestone 0) |
 
 ## Local development (backend)
 
-From `backend/MovieNest.Api/`:
+From `backend/`:
 
 ```bash
 dotnet build
