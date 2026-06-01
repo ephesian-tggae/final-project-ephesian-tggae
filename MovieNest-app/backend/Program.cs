@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -23,9 +24,16 @@ if (string.IsNullOrEmpty(googleClientId) || string.IsNullOrEmpty(googleClientSec
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
-.AddCookie()
+.AddCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+})
 .AddGoogle(options =>
 {
     options.ClientId = googleClientId;
@@ -39,12 +47,29 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options => options.RoutePrefix = "swagger");
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGet("/", () => "MovieNest API is running.");
+
+app.MapGet("/api/health", () =>
+    Results.Ok(new
+    {
+        status = "ok",
+        app = "MovieNest",
+        timeUtc = DateTime.UtcNow
+    }));
 
 app.MapGet("/api/auth/login", () =>
     Results.Challenge(
@@ -56,5 +81,13 @@ app.MapPost("/api/auth/logout", async (HttpContext httpContext) =>
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     return Results.Ok(new { message = "Logged out" });
 });
+
+app.MapGet("/api/me", (ClaimsPrincipal user) =>
+    Results.Ok(new
+    {
+        email = user.FindFirstValue(ClaimTypes.Email),
+        name = user.FindFirstValue(ClaimTypes.Name)
+    }))
+    .RequireAuthorization();
 
 app.Run();
