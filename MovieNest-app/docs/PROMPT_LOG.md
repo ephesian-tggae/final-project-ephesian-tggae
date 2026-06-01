@@ -16,20 +16,46 @@ Create and run the first migration so the database file and tables are actually 
 **Rejected:** none
 **Tested:** I checked the result by running dotnet build in the backend.
 
-# Prompt Log
-
-## Prompt 2:
+## Prompt 2: Set up Google login
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
 
-# Prompt Log
+**Goal:** I wanted users to sign in with Google, come back to the app, and be saved in the database.
+
+**Prompt:** "I want you to set up Google login for my MovieNest backend for me.
+
+I already have the backend database working with EF Core and SQLite, and I already saved my Google login client ID and secret in user-secrets.
+
+I want users to be able to go to a login endpoint, sign in with Google, and come back to the app without errors. After they log in, the app should save them in the database if they are new, or update their information if they already exist. Also add a logout endpoint.
+
+Keep the code simple and easy to understand. Do not add extra features beyond Google login and logout. Do not put any secrets in the code or appsettings files. Only change what is needed for this step. Once done run dotnet build. Tell me the commands you used. The URL I should open to test Google login and how I can check that the user was saved. Then give a simple explanation of what the main code changes do."
+
+**Result:** Added a login endpoint, a logout endpoint, and the code needed to send users to Google and bring them back after signing in.
+
+**Accepted:** I kept the Google login setup, the login and logout endpoints, and the database logic for saving or updating users
+
+**Changes I made:** None
+**Rejected:** None
+**Tested:**Ttested the login URL in the browser, signed in with Google, and checked that the user was saved in the SQLite database.
+
+## Prompt 3: Add a protected endpoint
+
+**Tool:** Cursor
+
+**Goal:** Add one backend endpoint that only works when the user is logged in. If they are not then it should return 401 Unauthorized.
+**Prompt:** "I want you to add one protected test endpoint to my MovieNest backend. Give a 401 unauthorized when someone who isn't logged in tries using the endpoint.
+
+Keep the code simple, show me what commands you used, and the urls I should test."
+
+**Result:** Added a protected endpoint but when testing, it returned 302 instead of 401.
+
+**Accepted:** I kept the protected endpoint because it still required the user to be logged in
+
+**Changes I made:** I used a follow up prompt to fix the response code: "Can you have the one protected endpoint return 401 for unauthenticated requests". After that, Cursor changed the cookie login behavior so unauthenticated requests returned 401.
+
+**Rejected:**I rejected the original 302 behavior
+
+**Tested:** I tested the endpoint while logged out
 
 ## Prompt :
 
@@ -42,8 +68,6 @@ Create and run the first migration so the database file and tables are actually 
 **Rejected:**
 **Tested:**
 
-# Prompt Log
-
 ## Prompt :
 
 **Tool:** Cursor
@@ -55,8 +79,6 @@ Create and run the first migration so the database file and tables are actually 
 **Rejected:**
 **Tested:**
 
-# Prompt Log
-
 ## Prompt :
 
 **Tool:** Cursor
@@ -67,21 +89,6 @@ Create and run the first migration so the database file and tables are actually 
 **Changes I made:**
 **Rejected:**
 **Tested:**
-
-# Prompt Log
-
-## Prompt :
-
-**Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
-
-# Prompt Log
 
 ## Prompt :
 
