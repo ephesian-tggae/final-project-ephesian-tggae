@@ -54,6 +54,14 @@ app.UseAuthorization();
 
 app.MapGet("/", () => "MovieNest API is running.");
 
+app.MapGet("/api/health", () =>
+    Results.Ok(new
+    {
+        status = "ok",
+        app = "MovieNest",
+        timeUtc = DateTime.UtcNow
+    }));
+
 app.MapGet("/api/auth/login", () =>
     Results.Challenge(
         new AuthenticationProperties { RedirectUri = "/" },
