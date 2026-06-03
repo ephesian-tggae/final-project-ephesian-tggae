@@ -28,6 +28,9 @@ builder.Services.AddAuthentication(options =>
 })
 .AddCookie(options =>
 {
+    // Lets the login cookie work when React (5173) calls the API (5102)
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Events.OnRedirectToLogin = context =>
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -55,7 +58,8 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
         policy.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
-            .AllowAnyMethod());
+            .AllowAnyMethod()
+            .AllowCredentials());
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -74,6 +78,8 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:5173";
+
 app.MapGet("/", () => "MovieNest API is running.");
 
 app.MapGet("/api/health", () =>
@@ -86,7 +92,7 @@ app.MapGet("/api/health", () =>
 
 app.MapGet("/api/auth/login", () =>
     Results.Challenge(
-        new AuthenticationProperties { RedirectUri = "/" },
+        new AuthenticationProperties { RedirectUri = frontendUrl },
         [GoogleDefaults.AuthenticationScheme]));
 
 app.MapPost("/api/auth/logout", async (HttpContext httpContext) =>
