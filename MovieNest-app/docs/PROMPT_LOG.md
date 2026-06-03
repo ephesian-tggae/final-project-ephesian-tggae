@@ -87,27 +87,45 @@ returned data on the screen
 **Tested:** ran the backend and frontend at the same time then opened the app in my browser to see if the page
 showed data coming from the backend public endpoint.
 
-## Prompt :
+## Prompt 5: Frontend sign in
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** For the user to login in react, sign in with google, return to the app, and have react
+show that the user is signed in.
 
-## Prompt :
+**Prompt:** "I want you to make the sign in flow work from the frontend to the backend now. What I expect is for the user to click a login button in react, get sent to google login, comes back thorugh the backend callback, and then react can tell the user is signed in. Use the current Google login setup I have. Make sure to keep the code simple and easy to understand.
+
+When done show me what commands you used, how the login flow works What urls I should test,
+how I can tell in react that the user is signed in."
+
+**Result:** Added a login button, made React send the user to the backend login endpoint, and added a way for it to check
+if the user is signed in.
+
+**Accepted:** I kept the whole frontend login flow
+**Changes I made:** none
+**Rejected:** none
+**Tested:** I tested signing into with Google, returned to the app,
+
+## Prompt 6:
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** Add 3 protected routes can signed in users can open and those that are not can't.
+
+**Prompt:** "I want you to add at least three protected routes in my React app. These pages should only be available
+when the user is signed in. If the user is not signed in and tries to open one of these pages, send them back to a
+public page like the home page.
+
+Keep the code simple and easy to understand. When done show me what commands you used.
+Give me the three protected routes URLs. Tell me how I can test them while logged in and out."
+
+**Result:** The protected routes onlu load when the user is signed in. If the user is signed out and tries to visit one of the 3 pages,
+the app redirects them back to th epublic page.
+
+**Accepted:** I kpet the protected routes setup because they proved the routes worked
+**Changes I made:** none
+**Rejected:** none
+**Tested:** I tested the routes by entering the urls when logged off which redirected me the th epublic page. Tested when signed in
+to see the they would open normally.
 
 ## Prompt :
 

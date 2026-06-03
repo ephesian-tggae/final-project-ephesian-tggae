@@ -31,3 +31,17 @@ button {
 .error {
   color: #b00020;
 }
+
+.subtitle {
+  color: #555;
+}
+
+.nav {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.nav a {
+  color: #1a5fb4;
+}
