@@ -106,7 +106,7 @@ if the user is signed in.
 **Rejected:** none
 **Tested:** I tested signing into with Google, returned to the app,
 
-## Prompt 6:
+## Prompt 6: 3 protected routes
 
 **Tool:** Cursor
 **Goal:** Add 3 protected routes can signed in users can open and those that are not can't.
@@ -127,16 +127,27 @@ the app redirects them back to th epublic page.
 **Tested:** I tested the routes by entering the urls when logged off which redirected me the th epublic page. Tested when signed in
 to see the they would open normally.
 
-## Prompt :
+## Prompt 7: Call protected endpoint from React
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** Have React send the signed in user authentication cookie to the backend and show the protected data on the page.
+
+**Prompt:** "I want you to connect one protected endpoint to my React app. I currently have login working and a protected
+endpoint that only works when the user is signed in so I want React to call that protected endpoint after the user logs
+in and show the returned data on the page.
+
+Make sure the request includes the signed-in user's authentication cookie so the backend knows who the user is. Keep
+the code simple and easy to understand. Don't change or add anything else. Tell me what commands you used, how I can
+test it logged in and what should ahppened if I test it while logged out."
+
+**Result:** React can now call the protected endpoint after login and shows the returned user data on the page.
+
+**Accepted:** I kept the protected endpoint call and the part that sends the authentication cookie with the request so the backend
+can recognize the signed in user.
+**Changes I made:** none
+**Rejected:** none
+**Tested:** I tested while logged in to see if React showed the protected data from the backend. I also tested when signed out
+to see that the protected request did not return the signed in user data.
 
 # Prompt Log
 
