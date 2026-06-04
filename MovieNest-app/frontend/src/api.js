@@ -41,3 +41,33 @@ export async function logout() {
     throw new Error(`Backend returned ${response.status}`);
   }
 }
+
+export async function fetchWatchlist() {
+  const response = await fetch(`${apiBaseUrl}/api/watchlist`, withCredentials);
+
+  if (response.status === 401) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function addToWatchlist(title, releaseYear) {
+  const response = await fetch(`${apiBaseUrl}/api/watchlist`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, releaseYear: releaseYear || null }),
+    ...withCredentials,
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}

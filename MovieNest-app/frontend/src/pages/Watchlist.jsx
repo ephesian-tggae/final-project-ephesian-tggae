@@ -1,14 +1,103 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { addToWatchlist, fetchWatchlist } from '../api';
 
 export default function Watchlist() {
-  const { user } = useAuth();
+  const [items, setItems] = useState([]);
+  const [title, setTitle] = useState('');
+  const [releaseYear, setReleaseYear] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  async function loadWatchlist() {
+    const data = await fetchWatchlist();
+    if (data === null) {
+      setError('Not signed in');
+      setItems([]);
+    } else {
+      setItems(data);
+      setError(null);
+    }
+  }
+
+  useEffect(() => {
+    loadWatchlist()
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (!title.trim()) {
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const year = releaseYear ? parseInt(releaseYear, 10) : null;
+      const created = await addToWatchlist(title.trim(), year);
+      setItems((prev) => [created, ...prev]);
+      setTitle('');
+      setReleaseYear('');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <main className="page">
       <h1>Watchlist</h1>
-      <p>Protected page — only signed-in users can see this.</p>
-      <p>Hello, {user.name}.</p>
+      <p>Add a movie to your personal watchlist (saved in the database).</p>
+
+      <form className="watchlist-form" onSubmit={handleSubmit}>
+        <label>
+          Movie title
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Inception"
+            required
+          />
+        </label>
+        <label>
+          Year (optional)
+          <input
+            type="number"
+            value={releaseYear}
+            onChange={(e) => setReleaseYear(e.target.value)}
+            placeholder="2010"
+          />
+        </label>
+        <button type="submit" disabled={saving}>
+          {saving ? 'Saving…' : 'Add to watchlist'}
+        </button>
+      </form>
+
+      {loading && <p>Loading your watchlist…</p>}
+      {error && <p className="error">{error}</p>}
+
+      {!loading && items.length > 0 && (
+        <ul className="watchlist-items">
+          {items.map((item) => (
+            <li key={item.id}>
+              <strong>{item.title}</strong>
+              {item.releaseYear && ` (${item.releaseYear})`}
+              <span className="meta"> — added {new Date(item.addedAt).toLocaleString()}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {!loading && !error && items.length === 0 && (
+        <p>No movies yet. Add one above.</p>
+      )}
+
       <Link to="/">← Back to home</Link>
     </main>
   );

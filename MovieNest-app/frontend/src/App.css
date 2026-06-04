@@ -45,3 +45,36 @@ button {
 .nav a {
   color: #1a5fb4;
 }
+
+.watchlist-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  max-width: 20rem;
+}
+
+.watchlist-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.watchlist-form input {
+  padding: 0.4rem 0.5rem;
+}
+
+.watchlist-items {
+  list-style: none;
+  padding: 0;
+}
+
+.watchlist-items li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.watchlist-items .meta {
+  color: #666;
+  font-size: 0.9rem;
+}

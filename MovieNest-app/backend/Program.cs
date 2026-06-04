@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 using MovieNest.Api.Data;
+using MovieNest.Api.Dtos;
+using MovieNest.Api.Models;
 using MovieNest.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,7 @@ builder.Services.AddDbContext<MovieNestDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<UserSyncService>();
+builder.Services.AddScoped<CurrentUserService>();
 
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
@@ -108,5 +111,98 @@ app.MapGet("/api/me", (ClaimsPrincipal user) =>
         name = user.FindFirstValue(ClaimTypes.Name)
     }))
     .RequireAuthorization();
+
+app.MapGet("/api/watchlist", async (
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db) =>
+{
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var items = await db.UserMovies
+        .Where(um => um.UserId == dbUser.Id && um.Status == "watchlist")
+        .OrderByDescending(um => um.AddedAt)
+        .Select(um => new WatchlistItemResponse(
+            um.Id,
+            um.Movie.Title,
+            um.Movie.ReleaseYear,
+            um.Status,
+            um.AddedAt))
+        .ToListAsync();
+
+    return Results.Ok(items);
+})
+.RequireAuthorization();
+
+app.MapPost("/api/watchlist", async (
+    AddWatchlistRequest request,
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Title))
+    {
+        return Results.BadRequest(new { message = "Title is required." });
+    }
+
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var title = request.Title.Trim();
+    var movie = await db.Movies.FirstOrDefaultAsync(m => m.Title == title);
+
+    if (movie is null)
+    {
+        var minManualTmdb = await db.Movies
+            .Where(m => m.TmdbId < 0)
+            .Select(m => (int?)m.TmdbId)
+            .MinAsync() ?? 0;
+
+        movie = new Movie
+        {
+            Title = title,
+            ReleaseYear = request.ReleaseYear,
+            TmdbId = minManualTmdb - 1
+        };
+        db.Movies.Add(movie);
+        await db.SaveChangesAsync();
+    }
+
+    var alreadyOnList = await db.UserMovies
+        .AnyAsync(um => um.UserId == dbUser.Id && um.MovieId == movie.Id);
+
+    if (alreadyOnList)
+    {
+        return Results.Conflict(new { message = "This movie is already on your watchlist." });
+    }
+
+    var userMovie = new UserMovie
+    {
+        UserId = dbUser.Id,
+        MovieId = movie.Id,
+        Status = "watchlist",
+        AddedAt = DateTime.UtcNow
+    };
+
+    db.UserMovies.Add(userMovie);
+    await db.SaveChangesAsync();
+
+    var response = new WatchlistItemResponse(
+        userMovie.Id,
+        movie.Title,
+        movie.ReleaseYear,
+        userMovie.Status,
+        userMovie.AddedAt);
+
+    return Results.Created($"/api/watchlist/{userMovie.Id}", response);
+})
+.RequireAuthorization();
 
 app.Run();
