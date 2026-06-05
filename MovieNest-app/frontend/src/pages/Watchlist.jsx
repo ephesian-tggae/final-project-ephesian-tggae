@@ -19,8 +19,10 @@ export default function Watchlist() {
       setItems(data);
       setError(null);
     }
+    return data;
   }
 
+  // Runs on every page load / browser refresh — fetches saved rows from SQLite via the API
   useEffect(() => {
     loadWatchlist()
       .catch((err) => setError(err.message))
@@ -38,21 +40,38 @@ export default function Watchlist() {
 
     try {
       const year = releaseYear ? parseInt(releaseYear, 10) : null;
-      const created = await addToWatchlist(title.trim(), year);
-      setItems((prev) => [created, ...prev]);
+      await addToWatchlist(title.trim(), year);
       setTitle('');
       setReleaseYear('');
+      setLoading(true);
+      await loadWatchlist();
     } catch (err) {
       setError(err.message);
     } finally {
       setSaving(false);
+      setLoading(false);
+    }
+  }
+
+  async function handleReload() {
+    setLoading(true);
+    setError(null);
+    try {
+      await loadWatchlist();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <main className="page">
       <h1>Watchlist</h1>
-      <p>Add a movie to your personal watchlist (saved in the database).</p>
+      <p>
+        Saved in the database. Refresh the page or restart the backend — your list
+        loads again from <code>GET /api/watchlist</code>.
+      </p>
 
       <form className="watchlist-form" onSubmit={handleSubmit}>
         <label>
@@ -79,7 +98,11 @@ export default function Watchlist() {
         </button>
       </form>
 
-      {loading && <p>Loading your watchlist…</p>}
+      <button type="button" onClick={handleReload} disabled={loading}>
+        Reload from database
+      </button>
+
+      {loading && <p>Loading your watchlist from the backend…</p>}
       {error && <p className="error">{error}</p>}
 
       {!loading && items.length > 0 && (
