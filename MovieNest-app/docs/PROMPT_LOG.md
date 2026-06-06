@@ -151,16 +151,27 @@ to see that the protected request did not return the signed in user data.
 
 # Prompt Log
 
-## Prompt :
+## Prompt 8: Create user owned data
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** To have a feature that can have signed in users create their own data from the app and have it saved in the database.
+
+**Prompt:** "The data should belong to the signed in user only. React should have a simple form or button to create it,
+the backend should save it with the current logged in user, and the page should show the saved result after it is created.
+
+Keep the code simple and easy to understand. Show me what commands you sued. Explain how the backend knows which user
+owns the data. Show me how I can test it and how I can check that it was saved in the database"
+
+**Result:** Created a form and button that lets users create data in their watchlist. The backend now saves the data in the database
+and connects it to the currently signed in user to which is saved and displayed on the page..
+
+**Accepted:** I kept the watchlist feature because it can be created from React, saved in the database, and be linked to the signed
+in user.
+
+**Changes I made:** none
+**Rejected:** none
+**Tested:** Signed in then created the data by choosing a move to add to my watchlist. Watch it display on the page after
+I saved it. I also checked the database to see if the data was saved and connected to the signed in user.
 
 # Prompt Log
 
