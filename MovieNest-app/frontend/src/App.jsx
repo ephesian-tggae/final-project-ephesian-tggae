@@ -1,51 +1,45 @@
-import { useEffect, useState } from 'react';
-import { fetchMe, logout, startLogin } from './api';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './AuthContext';
+import ProtectedRoute from './ProtectedRoute';
+import Home from './pages/Home';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
+import Watchlist from './pages/Watchlist';
 import './App.css';
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchMe()
-      .then(setUser)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  async function handleLogout() {
-    await logout();
-    setUser(null);
-  }
-
   return (
-    <main className="page">
-      <h1>MovieNest</h1>
-
-      {loading && <p>Checking if you are signed in…</p>}
-
-      {error && <p className="error">Error: {error}</p>}
-
-      {!loading && !error && user && (
-        <section className="auth-box">
-          <p className="signed-in">Signed in as <strong>{user.name}</strong></p>
-          <p className="email">{user.email}</p>
-          <button type="button" onClick={handleLogout}>
-            Log out
-          </button>
-        </section>
-      )}
-
-      {!loading && !error && !user && (
-        <section className="auth-box">
-          <p>You are not signed in.</p>
-          <button type="button" onClick={startLogin}>
-            Log in with Google
-          </button>
-        </section>
-      )}
-    </main>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/watchlist"
+            element={
+              <ProtectedRoute>
+                <Watchlist />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
