@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { addToWatchlist, fetchWatchlist } from '../api';
+import { addToWatchlist, fetchWatchlist, removeFromWatchlist } from '../api';
 
 export default function Watchlist() {
   const [items, setItems] = useState([]);
@@ -9,6 +9,7 @@ export default function Watchlist() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [removingId, setRemovingId] = useState(null);
 
   async function loadWatchlist() {
     const data = await fetchWatchlist();
@@ -65,6 +66,20 @@ export default function Watchlist() {
     }
   }
 
+  async function handleRemove(id) {
+    setRemovingId(id);
+    setError(null);
+
+    try {
+      await removeFromWatchlist(id);
+      await loadWatchlist();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setRemovingId(null);
+    }
+  }
+
   return (
     <main className="page">
       <h1>Watchlist</h1>
@@ -112,6 +127,13 @@ export default function Watchlist() {
               <strong>{item.title}</strong>
               {item.releaseYear && ` (${item.releaseYear})`}
               <span className="meta"> — added {new Date(item.addedAt).toLocaleString()}</span>
+              <button
+                type="button"
+                onClick={() => handleRemove(item.id)}
+                disabled={removingId === item.id}
+              >
+                {removingId === item.id ? 'Removing…' : 'Remove'}
+              </button>
             </li>
           ))}
         </ul>

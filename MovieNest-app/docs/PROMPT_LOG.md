@@ -149,8 +149,6 @@ can recognize the signed in user.
 **Tested:** I tested while logged in to see if React showed the protected data from the backend. I also tested when signed out
 to see that the protected request did not return the signed in user data.
 
-# Prompt Log
-
 ## Prompt 8: Create user owned data
 
 **Tool:** Cursor
@@ -173,7 +171,22 @@ in user.
 **Tested:** Signed in then created the data by choosing a move to add to my watchlist. Watch it display on the page after
 I saved it. I also checked the database to see if the data was saved and connected to the signed in user.
 
-# Prompt Log
+## Prompt 9: Movie search
+
+**Tool:** Cursor
+**Goal:** So signed in users can search up movies
+
+**Prompt:** "Now I want to update my /search page to actually search movies. Add a protected backend endpoint to search that calls
+TMDB using its api key. Make sure to not expose the key in the frontend. Update the React search page so the user can type a movie
+name, click search, and see movie results on the page. Keep the code simple and easy to understand."
+
+**Result:** Added backend code that calls TMDB and returns movie results to the app. The page now has a search box
+that can show movie results like posters, titles, and the year.
+
+**Accepted:** Kept the protected seqarch feature and the backend tmdb api key setup.
+**Changes I made:** none
+**Rejected:** none
+**Tested:** Signed in and search a movie name to see if the movie appeared. Tested when signed out to see if it was protected.
 
 ## Prompt :
 
@@ -186,7 +199,16 @@ I saved it. I also checked the database to see if the data was saved and connect
 **Rejected:**
 **Tested:**
 
-# Prompt Log
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
 
 ## Prompt :
 
@@ -199,7 +221,16 @@ I saved it. I also checked the database to see if the data was saved and connect
 **Rejected:**
 **Tested:**
 
-# Prompt Log
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
 
 ## Prompt :
 
@@ -212,7 +243,16 @@ I saved it. I also checked the database to see if the data was saved and connect
 **Rejected:**
 **Tested:**
 
-# Prompt Log
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
 
 ## Prompt :
 
@@ -225,8 +265,6 @@ I saved it. I also checked the database to see if the data was saved and connect
 **Rejected:**
 **Tested:**
 
-# Prompt Log
-
 ## Prompt :
 
 **Tool:** Cursor
@@ -237,60 +275,6 @@ I saved it. I also checked the database to see if the data was saved and connect
 **Changes I made:**
 **Rejected:**
 **Tested:**
-
-# Prompt Log
-
-## Prompt :
-
-**Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
-
-# Prompt Log
-
-## Prompt :
-
-**Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
-
-# Prompt Log
-
-## Prompt :
-
-**Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
-
-# Prompt Log
-
-## Prompt :
-
-**Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
-
-# Prompt Log
 
 ## Prompt :
 

@@ -206,6 +206,33 @@ app.MapPost("/api/watchlist", async (
 })
 .RequireAuthorization();
 
+app.MapDelete("/api/watchlist/{id:int}", async (
+    int id,
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db) =>
+{
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var userMovie = await db.UserMovies
+        .FirstOrDefaultAsync(um => um.Id == id && um.UserId == dbUser.Id);
+
+    if (userMovie is null)
+    {
+        return Results.NotFound();
+    }
+
+    db.UserMovies.Remove(userMovie);
+    await db.SaveChangesAsync();
+
+    return Results.NoContent();
+})
+.RequireAuthorization();
+
 app.MapGet("/api/movies/search", async (string? q, TmdbService tmdb) =>
 {
     if (string.IsNullOrWhiteSpace(q))

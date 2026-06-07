@@ -72,6 +72,26 @@ export async function addToWatchlist(title, releaseYear) {
   return response.json();
 }
 
+export async function removeFromWatchlist(id) {
+  const response = await fetch(`${apiBaseUrl}/api/watchlist/${id}`, {
+    method: 'DELETE',
+    ...withCredentials,
+  });
+
+  if (response.status === 401) {
+    throw new Error('Not signed in');
+  }
+
+  if (response.status === 404) {
+    throw new Error('Watchlist item not found');
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Backend returned ${response.status}`);
+  }
+}
+
 export async function searchMovies(query) {
   const params = new URLSearchParams({ q: query });
   const response = await fetch(`${apiBaseUrl}/api/movies/search?${params}`, withCredentials);
