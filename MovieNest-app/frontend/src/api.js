@@ -71,3 +71,19 @@ export async function addToWatchlist(title, releaseYear) {
 
   return response.json();
 }
+
+export async function searchMovies(query) {
+  const params = new URLSearchParams({ q: query });
+  const response = await fetch(`${apiBaseUrl}/api/movies/search?${params}`, withCredentials);
+
+  if (response.status === 401) {
+    return null;
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}

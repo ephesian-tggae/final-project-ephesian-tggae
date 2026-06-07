@@ -78,3 +78,57 @@ button {
   color: #666;
   font-size: 0.9rem;
 }
+
+.search-page {
+  max-width: 40rem;
+}
+
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  max-width: 20rem;
+}
+
+.search-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.search-form input {
+  padding: 0.4rem 0.5rem;
+}
+
+.search-results {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+
+.search-result {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.search-poster {
+  width: 60px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #eee;
+  flex-shrink: 0;
+}
+
+.search-poster--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #666;
+  text-align: center;
+}

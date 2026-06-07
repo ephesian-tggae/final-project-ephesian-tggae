@@ -15,6 +15,7 @@ builder.Services.AddDbContext<MovieNestDbContext>(options =>
 
 builder.Services.AddScoped<UserSyncService>();
 builder.Services.AddScoped<CurrentUserService>();
+builder.Services.AddHttpClient<TmdbService>();
 
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
@@ -202,6 +203,18 @@ app.MapPost("/api/watchlist", async (
         userMovie.AddedAt);
 
     return Results.Created($"/api/watchlist/{userMovie.Id}", response);
+})
+.RequireAuthorization();
+
+app.MapGet("/api/movies/search", async (string? q, TmdbService tmdb) =>
+{
+    if (string.IsNullOrWhiteSpace(q))
+    {
+        return Results.BadRequest(new { message = "Query parameter q is required." });
+    }
+
+    var results = await tmdb.SearchMoviesAsync(q.Trim());
+    return Results.Ok(results);
 })
 .RequireAuthorization();
 
