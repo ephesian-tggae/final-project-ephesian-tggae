@@ -23,6 +23,7 @@ export default function Home() {
           </button>
           <nav className="nav">
             <Link to="/watchlist">Watchlist</Link>
+            <Link to="/search">Search</Link>
             <Link to="/profile">Profile</Link>
             <Link to="/settings">Settings</Link>
           </nav>
