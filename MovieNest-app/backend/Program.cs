@@ -233,6 +233,46 @@ app.MapDelete("/api/watchlist/{id:int}", async (
 })
 .RequireAuthorization();
 
+app.MapPatch("/api/watchlist/{id:int}", async (
+    int id,
+    UpdateWatchlistRequest request,
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db) =>
+{
+    if (request.Status != "watched")
+    {
+        return Results.BadRequest(new { message = "Only status 'watched' is supported." });
+    }
+
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var userMovie = await db.UserMovies
+        .Include(um => um.Movie)
+        .FirstOrDefaultAsync(um =>
+            um.Id == id && um.UserId == dbUser.Id && um.Status == "watchlist");
+
+    if (userMovie is null)
+    {
+        return Results.NotFound();
+    }
+
+    userMovie.Status = "watched";
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new WatchlistItemResponse(
+        userMovie.Id,
+        userMovie.Movie.Title,
+        userMovie.Movie.ReleaseYear,
+        userMovie.Status,
+        userMovie.AddedAt));
+})
+.RequireAuthorization();
+
 app.MapGet("/api/movies/search", async (string? q, TmdbService tmdb) =>
 {
     if (string.IsNullOrWhiteSpace(q))

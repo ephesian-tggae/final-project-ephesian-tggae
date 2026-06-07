@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { addToWatchlist, fetchWatchlist, removeFromWatchlist } from '../api';
+import { addToWatchlist, fetchWatchlist, markAsWatched, removeFromWatchlist } from '../api';
 
 export default function Watchlist() {
   const [items, setItems] = useState([]);
@@ -10,6 +10,7 @@ export default function Watchlist() {
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [removingId, setRemovingId] = useState(null);
+  const [markingId, setMarkingId] = useState(null);
 
   async function loadWatchlist() {
     const data = await fetchWatchlist();
@@ -80,6 +81,20 @@ export default function Watchlist() {
     }
   }
 
+  async function handleMarkWatched(id) {
+    setMarkingId(id);
+    setError(null);
+
+    try {
+      await markAsWatched(id);
+      await loadWatchlist();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setMarkingId(null);
+    }
+  }
+
   return (
     <main className="page">
       <h1>Watchlist</h1>
@@ -129,8 +144,15 @@ export default function Watchlist() {
               <span className="meta"> — added {new Date(item.addedAt).toLocaleString()}</span>
               <button
                 type="button"
+                onClick={() => handleMarkWatched(item.id)}
+                disabled={markingId === item.id || removingId === item.id}
+              >
+                {markingId === item.id ? 'Updating…' : 'Mark as watched'}
+              </button>
+              <button
+                type="button"
                 onClick={() => handleRemove(item.id)}
-                disabled={removingId === item.id}
+                disabled={removingId === item.id || markingId === item.id}
               >
                 {removingId === item.id ? 'Removing…' : 'Remove'}
               </button>
