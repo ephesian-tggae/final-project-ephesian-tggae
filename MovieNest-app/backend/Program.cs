@@ -13,8 +13,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<MovieNestDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<DatabaseSeeder>();
+
+var isSeedCommand = args.Length > 0 && args[0].Equals("seed", StringComparison.OrdinalIgnoreCase);
+if (isSeedCommand)
+{
+    var reset = args.Any(a => a.Equals("--reset", StringComparison.OrdinalIgnoreCase));
+    var seedApp = builder.Build();
+    using var scope = seedApp.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    await seeder.RunAsync(reset);
+    return;
+}
+
 builder.Services.AddScoped<UserSyncService>();
 builder.Services.AddScoped<CurrentUserService>();
+builder.Services.AddHttpClient<TmdbService>();
 
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
@@ -202,6 +216,85 @@ app.MapPost("/api/watchlist", async (
         userMovie.AddedAt);
 
     return Results.Created($"/api/watchlist/{userMovie.Id}", response);
+})
+.RequireAuthorization();
+
+app.MapDelete("/api/watchlist/{id:int}", async (
+    int id,
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db) =>
+{
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var userMovie = await db.UserMovies
+        .FirstOrDefaultAsync(um => um.Id == id && um.UserId == dbUser.Id);
+
+    if (userMovie is null)
+    {
+        return Results.NotFound();
+    }
+
+    db.UserMovies.Remove(userMovie);
+    await db.SaveChangesAsync();
+
+    return Results.NoContent();
+})
+.RequireAuthorization();
+
+app.MapPatch("/api/watchlist/{id:int}", async (
+    int id,
+    UpdateWatchlistRequest request,
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db) =>
+{
+    if (request.Status != "watched")
+    {
+        return Results.BadRequest(new { message = "Only status 'watched' is supported." });
+    }
+
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var userMovie = await db.UserMovies
+        .Include(um => um.Movie)
+        .FirstOrDefaultAsync(um =>
+            um.Id == id && um.UserId == dbUser.Id && um.Status == "watchlist");
+
+    if (userMovie is null)
+    {
+        return Results.NotFound();
+    }
+
+    userMovie.Status = "watched";
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new WatchlistItemResponse(
+        userMovie.Id,
+        userMovie.Movie.Title,
+        userMovie.Movie.ReleaseYear,
+        userMovie.Status,
+        userMovie.AddedAt));
+})
+.RequireAuthorization();
+
+app.MapGet("/api/movies/search", async (string? q, TmdbService tmdb) =>
+{
+    if (string.IsNullOrWhiteSpace(q))
+    {
+        return Results.BadRequest(new { message = "Query parameter q is required." });
+    }
+
+    var results = await tmdb.SearchMoviesAsync(q.Trim());
+    return Results.Ok(results);
 })
 .RequireAuthorization();
 
