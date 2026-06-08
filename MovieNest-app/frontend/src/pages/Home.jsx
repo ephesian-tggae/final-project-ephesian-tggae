@@ -77,12 +77,18 @@ export default function Home() {
         </section>
       ) : (
         <section className="landing-cta auth-box">
-          <Link to="/discover" className="button-link">
-            Browse movies
-          </Link>
-          <button type="button" onClick={startLogin}>
-            Log in with Google
-          </button>
+          <div className="landing-cta-buttons">
+            <Link to="/discover" className="landing-btn landing-btn--primary">
+              Browse movies
+            </Link>
+            <button
+              type="button"
+              className="landing-btn landing-btn--secondary"
+              onClick={startLogin}
+            >
+              Log in with Google
+            </button>
+          </div>
           <p className="landing-cta-note">
             Browse without an account, or sign in to save your watchlist.
           </p>

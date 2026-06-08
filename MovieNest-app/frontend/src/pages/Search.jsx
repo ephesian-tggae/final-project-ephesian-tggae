@@ -40,7 +40,7 @@ export default function Search() {
   return (
     <main className="page search-page">
       <h1>Search</h1>
-      <p>Search movies from TMDB.</p>
+      <p className="subtitle">Search movies from TMDB.</p>
 
       <form className="search-form" onSubmit={handleSubmit}>
         <label>
