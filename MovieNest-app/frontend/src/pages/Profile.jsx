@@ -23,7 +23,7 @@ export default function Profile() {
   return (
     <main className="page">
       <h1>Profile</h1>
-      <p>Data from protected endpoint <code>GET /api/me</code>:</p>
+      <p className="subtitle">Data from protected endpoint <code>GET /api/me</code>:</p>
 
       {loading && <p>Loading profile from backend…</p>}
 

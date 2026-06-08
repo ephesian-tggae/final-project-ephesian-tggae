@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import ProtectedRoute from './ProtectedRoute';
+import Discover from './pages/Discover';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Search from './pages/Search';
@@ -14,6 +15,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/discover" element={<Discover />} />
           <Route
             path="/watchlist"
             element={

@@ -98,7 +98,7 @@ export default function Watchlist() {
   return (
     <main className="page">
       <h1>Watchlist</h1>
-      <p>
+      <p className="subtitle">
         Saved in the database. Refresh the page or restart the backend — your list
         loads again from <code>GET /api/watchlist</code>.
       </p>
