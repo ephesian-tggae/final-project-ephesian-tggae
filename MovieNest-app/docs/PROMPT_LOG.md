@@ -188,27 +188,46 @@ that can show movie results like posters, titles, and the year.
 **Rejected:** none
 **Tested:** Signed in and search a movie name to see if the movie appeared. Tested when signed out to see if it was protected.
 
-## Prompt :
+## Prompt 10: Watchlist update
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** Have users marka watchlist movie as watched
 
-## Prompt :
+**Prompt:** "I want to add a way for signed in users to mark a watchlist movie as watched. So on the watchlist page,
+I should see each movie having a mark as wached button. When I click it, that movie should update and no longer
+show on my watchlist because it’s watched now. Only the sined in users should be able to update their own movies
+meaning that one user should not be able to change another user's watchlist.
+
+Keep the code simple and only change for what is asked here."
+
+**Result:** The watchlist page now has a button for each movie, and clicking it updates
+that movie so it no longer appears in the watchlist.
+
+**Accepted:** I accepted the mark as watched button feature because it function to update
+the user's watchlist.
+
+**Changes I made:** none
+**Rejected:** none
+**Tested:** Tested by logging in, entering a movie, then marked it as watched to see it disappear.
+
+## Prompt 11: Seed data
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** Add test data to the MovieNest database consisting of fake users, movies, and watchlist/watched records.
+
+**Prompt:** "I want you to add a simple way to seed my MovieNest database with test data. After the seeding I need the database
+to have about 500 movies, 50 fake users, and 1,000 watchlist or watched movie records. I want the fake users to be clearly seperated
+from the real Google users so that it doesn't break the real login system. I also don't want running the seed to not
+delete or mess up my real Google user data. Make sure to keep it simple. let me know how to run the seed, how to reset it, and
+how to check that the seed worked."
+
+**Result:** The seed the AI created had fake movies, fake users, and fake watchlist/watched records. It also made sure to
+keep the fake users seperated from the real Google users so that the login system is not affected.
+
+**Accepted:** I kept the seed setup because it gave the database realistic test data
+**Changes I made:** none
+**Rejected:** none
+**Tested:** Tested by running the seed command and checking that the database had 500, 50, 1000 that I asked for.
 
 ## Prompt :
 
