@@ -4,4 +4,5 @@ public record MovieSearchResultResponse(
     int TmdbId,
     string Title,
     int? ReleaseYear,
-    string? PosterUrl);
+    string? PosterUrl,
+    string? Overview);

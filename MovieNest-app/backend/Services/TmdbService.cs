@@ -55,11 +55,14 @@ public class TmdbService
             ? null
             : $"{ImageBaseUrl}{movie.PosterPath}";
 
+        var overview = string.IsNullOrWhiteSpace(movie.Overview) ? null : movie.Overview.Trim();
+
         return new MovieSearchResultResponse(
             movie.Id,
             movie.Title,
             releaseYear,
-            posterUrl);
+            posterUrl,
+            overview);
     }
 
     private sealed class TmdbSearchResponse
@@ -81,5 +84,8 @@ public class TmdbService
 
         [JsonPropertyName("poster_path")]
         public string? PosterPath { get; set; }
+
+        [JsonPropertyName("overview")]
+        public string? Overview { get; set; }
     }
 }

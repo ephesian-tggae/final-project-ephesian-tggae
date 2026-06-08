@@ -71,9 +71,12 @@ export default function Search() {
               ) : (
                 <div className="search-poster search-poster--empty">No poster</div>
               )}
-              <div>
+              <div className="search-result-details">
                 <strong>{movie.title}</strong>
                 {movie.releaseYear && <span> ({movie.releaseYear})</span>}
+                {movie.overview && (
+                  <p className="search-overview">{movie.overview}</p>
+                )}
               </div>
             </li>
           ))}

@@ -110,9 +110,21 @@ button {
 .search-result {
   display: flex;
   gap: 1rem;
-  align-items: center;
+  align-items: flex-start;
   padding: 0.75rem 0;
   border-bottom: 1px solid #eee;
+}
+
+.search-result-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-overview {
+  margin: 0.5rem 0 0;
+  color: #444;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .search-poster {
