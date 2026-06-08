@@ -5,6 +5,110 @@
   font-family: system-ui, sans-serif;
 }
 
+.landing-page,
+.discover-page,
+.search-page {
+  max-width: 40rem;
+}
+
+.landing-hero h1 {
+  margin-bottom: 0.5rem;
+}
+
+.landing-tagline {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+.landing-features ul {
+  padding-left: 1.25rem;
+  line-height: 1.6;
+}
+
+.landing-stats {
+  margin: 1.5rem 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f9f9f9;
+  text-align: center;
+}
+
+.stat-card strong {
+  font-size: 1.25rem;
+}
+
+.stat-card span {
+  font-size: 0.8rem;
+  color: #555;
+  margin-top: 0.25rem;
+}
+
+.stats-note {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.landing-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.landing-cta-note {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0;
+}
+
+.button-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #1a5fb4;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.button-link:hover {
+  background: #15539e;
+}
+
+.discover-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.discover-cta {
+  margin: 1.5rem 0 1rem;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #1a5fb4;
+  text-decoration: underline;
+  font-size: inherit;
+}
+
 .auth-box {
   margin-top: 1.5rem;
   padding: 1.25rem;
@@ -77,10 +181,6 @@ button {
 .watchlist-items .meta {
   color: #666;
   font-size: 0.9rem;
-}
-
-.search-page {
-  max-width: 40rem;
 }
 
 .search-form {

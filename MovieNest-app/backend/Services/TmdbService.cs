@@ -23,10 +23,22 @@ public class TmdbService
         CancellationToken cancellationToken = default)
     {
         var encodedQuery = Uri.EscapeDataString(query);
-        var response = await _http.GetAsync(
+        return await FetchMoviesAsync(
             $"search/movie?api_key={_apiKey}&query={encodedQuery}",
             cancellationToken);
+    }
 
+    public async Task<IReadOnlyList<MovieSearchResultResponse>> GetPopularMoviesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await FetchMoviesAsync($"movie/popular?api_key={_apiKey}", cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<MovieSearchResultResponse>> FetchMoviesAsync(
+        string path,
+        CancellationToken cancellationToken)
+    {
+        var response = await _http.GetAsync(path, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var payload = await response.Content.ReadFromJsonAsync<TmdbSearchResponse>(

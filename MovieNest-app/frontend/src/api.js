@@ -116,6 +116,39 @@ export async function markAsWatched(id) {
   return response.json();
 }
 
+export async function fetchPublicStats() {
+  const response = await fetch(`${apiBaseUrl}/api/public/stats`);
+
+  if (!response.ok) {
+    throw new Error(`Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function fetchPopularMovies() {
+  const response = await fetch(`${apiBaseUrl}/api/public/movies/popular`);
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function searchPublicMovies(query) {
+  const params = new URLSearchParams({ q: query });
+  const response = await fetch(`${apiBaseUrl}/api/public/movies/search?${params}`);
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export async function searchMovies(query) {
   const params = new URLSearchParams({ q: query });
   const response = await fetch(`${apiBaseUrl}/api/movies/search?${params}`, withCredentials);

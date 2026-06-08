@@ -107,6 +107,32 @@ app.MapGet("/api/health", () =>
         timeUtc = DateTime.UtcNow
     }));
 
+app.MapGet("/api/public/stats", async (MovieNestDbContext db) =>
+{
+    var totalMovies = await db.Movies.CountAsync();
+    var totalMembers = await db.Users.CountAsync();
+    var totalActivity = await db.UserMovies.CountAsync();
+
+    return Results.Ok(new PublicStatsResponse(totalMovies, totalMembers, totalActivity));
+});
+
+app.MapGet("/api/public/movies/popular", async (TmdbService tmdb) =>
+{
+    var results = await tmdb.GetPopularMoviesAsync();
+    return Results.Ok(results);
+});
+
+app.MapGet("/api/public/movies/search", async (string? q, TmdbService tmdb) =>
+{
+    if (string.IsNullOrWhiteSpace(q))
+    {
+        return Results.BadRequest(new { message = "Query parameter q is required." });
+    }
+
+    var results = await tmdb.SearchMoviesAsync(q.Trim());
+    return Results.Ok(results);
+});
+
 app.MapGet("/api/auth/login", () =>
     Results.Challenge(
         new AuthenticationProperties { RedirectUri = frontendUrl },

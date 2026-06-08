@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { searchMovies } from '../api';
+import MovieResultList from '../components/MovieResultList';
 
 export default function Search() {
   const [query, setQuery] = useState('');
@@ -62,26 +63,7 @@ export default function Search() {
         <p>No movies found for &ldquo;{query.trim()}&rdquo;.</p>
       )}
 
-      {results.length > 0 && (
-        <ul className="search-results">
-          {results.map((movie) => (
-            <li key={movie.tmdbId} className="search-result">
-              {movie.posterUrl ? (
-                <img src={movie.posterUrl} alt="" className="search-poster" />
-              ) : (
-                <div className="search-poster search-poster--empty">No poster</div>
-              )}
-              <div className="search-result-details">
-                <strong>{movie.title}</strong>
-                {movie.releaseYear && <span> ({movie.releaseYear})</span>}
-                {movie.overview && (
-                  <p className="search-overview">{movie.overview}</p>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      <MovieResultList movies={results} />
 
       <Link to="/">← Back to home</Link>
     </main>
