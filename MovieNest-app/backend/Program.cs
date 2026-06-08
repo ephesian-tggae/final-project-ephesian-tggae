@@ -13,6 +13,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<MovieNestDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<DatabaseSeeder>();
+
+var isSeedCommand = args.Length > 0 && args[0].Equals("seed", StringComparison.OrdinalIgnoreCase);
+if (isSeedCommand)
+{
+    var reset = args.Any(a => a.Equals("--reset", StringComparison.OrdinalIgnoreCase));
+    var seedApp = builder.Build();
+    using var scope = seedApp.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    await seeder.RunAsync(reset);
+    return;
+}
+
 builder.Services.AddScoped<UserSyncService>();
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddHttpClient<TmdbService>();
