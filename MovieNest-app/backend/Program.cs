@@ -252,12 +252,16 @@ app.MapDelete("/api/watchlist/{id:int}", async (
         return Results.Unauthorized();
     }
 
-    var userMovie = await db.UserMovies
-        .FirstOrDefaultAsync(um => um.Id == id && um.UserId == dbUser.Id);
+    var userMovie = await db.UserMovies.FirstOrDefaultAsync(um => um.Id == id);
 
     if (userMovie is null)
     {
         return Results.NotFound();
+    }
+
+    if (userMovie.UserId != dbUser.Id)
+    {
+        return Results.StatusCode(StatusCodes.Status403Forbidden);
     }
 
     db.UserMovies.Remove(userMovie);
@@ -287,10 +291,19 @@ app.MapPatch("/api/watchlist/{id:int}", async (
 
     var userMovie = await db.UserMovies
         .Include(um => um.Movie)
-        .FirstOrDefaultAsync(um =>
-            um.Id == id && um.UserId == dbUser.Id && um.Status == "watchlist");
+        .FirstOrDefaultAsync(um => um.Id == id);
 
     if (userMovie is null)
+    {
+        return Results.NotFound();
+    }
+
+    if (userMovie.UserId != dbUser.Id)
+    {
+        return Results.StatusCode(StatusCodes.Status403Forbidden);
+    }
+
+    if (userMovie.Status != "watchlist")
     {
         return Results.NotFound();
     }

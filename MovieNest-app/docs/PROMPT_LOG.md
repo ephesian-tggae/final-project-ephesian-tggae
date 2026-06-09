@@ -229,38 +229,68 @@ keep the fake users seperated from the real Google users so that the login syste
 **Rejected:** none
 **Tested:** Tested by running the seed command and checking that the database had 500, 50, 1000 that I asked for.
 
-## Prompt :
+## Prompt 12: Public experience
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** Have the public pages have a improved public experience for MovieNest so people who are not signed in
+can can still understand and use the app.
 
-## Prompt :
+**Prompt:** "I want to improve the publix experience for MovieNest so look up Product_Brief and README to understand
+what MovieNest is supposed to be. I expect the public pages to explain that MovieNest is for discovering movies,
+building watchlists, and much more.
+
+When updating make the home page feel more like a real landing page, not some basic login page. It should explain
+the app, have a clear Google login button, and link to a publcic movie browsing page. I believe adding a public
+browse or disocvoer page where sign out users can see real movie data like movie posters, titles, years and short
+description is a good idea. I do want to remind that this page should not require any login since the movie data
+can come from TMDB but as long as the API key stay safe in the backend and not be exposed in React.
+
+Keep the code simple and only change what is needed for the public experience."
+
+**Result:** It updated the landing page by adding public stats and highlights so visitors can see that the app has movie activity.
+
+**Accepted:** I kept the new landing page because it displayed the browsing features and the purpose of the app well
+**Changes I made:** none
+**Rejected:** I rejected the first plain layout because it didn't look polished enough to be a good public
+experience.
+**Tested:** Tested by being logged out.
+
+## Prompt 13: Styling
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** Improve on the look of the page
 
-## Prompt :
+**Prompt:** "The public landing page works but it still looks plain. I want it to look better and feel more like a real
+movie app. I want the text easier to read, fix the spacing, make the buttons look cleaner, and make the page feel
+more polished. Make the page have a more darker movie style look with light text and clear buttons"
+
+**Result:** The layout, spacing, text readability, style, and buttons were improved.
+**Accepted:** Kept the improved design because it came out looking more professional.
+**Changes I made:** none
+**Rejected:** none
+**Tested:** Just viewing the page to see if it's to my liking
+
+## Prompt 14: 403 Error
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** Have code that prevents one signed in user to not be able to update or delete another user's watchlist item
+
+**Prompt:** "I want to fix the watchlist security so that signed in users can't change or delete another user's watchlist
+items. The functions of delete and mark as watched actions should only work if the item in the watchlist belongs to
+them so if the item doesn't exist, it should return 404. If the item exists but belongs to a different user, return 403 forbidden.
+
+Keep thenormal 401 response for anyone who isn't signed in. Keep the code simple. Tell me how I can test that one
+user can't change another user's watchlist items"
+
+**Result:** Updated the backend watchlist security for deleting and marking items as watched. The endpoints now
+check whether the watchlist item exists and if it belongs to the signed in user.
+
+**Accepted:** I kpet the security checks because they protect the user owned data and help prove user isolation
+**Changes I made:** none
+**Rejected:** none
+**Tested:** Tested if a signed out user get 401. Tested if a signed in user gets 404 when the item doesn't exist.
+Tested when a signed in user gets 403 when trying to update and delete another user's watchlist item through the console
+when having the other user's watchlist item id.
 
 ## Prompt :
 
