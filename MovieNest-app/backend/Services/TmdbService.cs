@@ -34,6 +34,30 @@ public class TmdbService
         return await FetchMoviesAsync($"movie/popular?api_key={_apiKey}", cancellationToken);
     }
 
+    public async Task<MovieSearchResultResponse?> FindFirstMatchAsync(
+        string query,
+        CancellationToken cancellationToken = default)
+    {
+        var results = await SearchMoviesAsync(query, cancellationToken);
+        return results.FirstOrDefault();
+    }
+
+    public static string? ToPosterUrl(string? posterPathOrUrl)
+    {
+        if (string.IsNullOrWhiteSpace(posterPathOrUrl))
+        {
+            return null;
+        }
+
+        if (posterPathOrUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || posterPathOrUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            return posterPathOrUrl;
+        }
+
+        return $"{ImageBaseUrl}{posterPathOrUrl}";
+    }
+
     private async Task<IReadOnlyList<MovieSearchResultResponse>> FetchMoviesAsync(
         string path,
         CancellationToken cancellationToken)

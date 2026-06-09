@@ -70,6 +70,7 @@ export default function Home() {
           <nav className="nav">
             <Link to="/discover">Discover</Link>
             <Link to="/watchlist">Watchlist</Link>
+            <Link to="/history">History</Link>
             <Link to="/search">Search</Link>
             <Link to="/profile">Profile</Link>
             <Link to="/settings">Settings</Link>

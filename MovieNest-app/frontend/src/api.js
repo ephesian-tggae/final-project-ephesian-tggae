@@ -56,11 +56,31 @@ export async function fetchWatchlist() {
   return response.json();
 }
 
-export async function addToWatchlist(title, releaseYear) {
+export async function fetchHistory() {
+  const response = await fetch(`${apiBaseUrl}/api/history`, withCredentials);
+
+  if (response.status === 401) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function addToWatchlist(title, releaseYear, options = {}) {
+  const { tmdbId = null, posterPath = null } = options;
   const response = await fetch(`${apiBaseUrl}/api/watchlist`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, releaseYear: releaseYear || null }),
+    body: JSON.stringify({
+      title,
+      releaseYear: releaseYear || null,
+      tmdbId,
+      posterPath,
+    }),
     ...withCredentials,
   });
 

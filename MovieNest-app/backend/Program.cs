@@ -28,6 +28,7 @@ if (isSeedCommand)
 
 builder.Services.AddScoped<UserSyncService>();
 builder.Services.AddScoped<CurrentUserService>();
+builder.Services.AddScoped<WatchlistMovieService>();
 builder.Services.AddHttpClient<TmdbService>();
 
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
@@ -165,16 +166,32 @@ app.MapGet("/api/watchlist", async (
 
     var items = await db.UserMovies
         .Where(um => um.UserId == dbUser.Id && um.Status == "watchlist")
+        .Include(um => um.Movie)
         .OrderByDescending(um => um.AddedAt)
-        .Select(um => new WatchlistItemResponse(
-            um.Id,
-            um.Movie.Title,
-            um.Movie.ReleaseYear,
-            um.Status,
-            um.AddedAt))
         .ToListAsync();
 
-    return Results.Ok(items);
+    return Results.Ok(items.Select(WatchlistMapper.ToItem).ToList());
+})
+.RequireAuthorization();
+
+app.MapGet("/api/history", async (
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db) =>
+{
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var items = await db.UserMovies
+        .Where(um => um.UserId == dbUser.Id && um.Status == "watched")
+        .Include(um => um.Movie)
+        .OrderByDescending(um => um.AddedAt)
+        .ToListAsync();
+
+    return Results.Ok(items.Select(WatchlistMapper.ToItem).ToList());
 })
 .RequireAuthorization();
 
@@ -182,7 +199,8 @@ app.MapPost("/api/watchlist", async (
     AddWatchlistRequest request,
     ClaimsPrincipal user,
     CurrentUserService currentUser,
-    MovieNestDbContext db) =>
+    MovieNestDbContext db,
+    WatchlistMovieService watchlistMovies) =>
 {
     if (string.IsNullOrWhiteSpace(request.Title))
     {
@@ -195,25 +213,7 @@ app.MapPost("/api/watchlist", async (
         return Results.Unauthorized();
     }
 
-    var title = request.Title.Trim();
-    var movie = await db.Movies.FirstOrDefaultAsync(m => m.Title == title);
-
-    if (movie is null)
-    {
-        var minManualTmdb = await db.Movies
-            .Where(m => m.TmdbId < 0)
-            .Select(m => (int?)m.TmdbId)
-            .MinAsync() ?? 0;
-
-        movie = new Movie
-        {
-            Title = title,
-            ReleaseYear = request.ReleaseYear,
-            TmdbId = minManualTmdb - 1
-        };
-        db.Movies.Add(movie);
-        await db.SaveChangesAsync();
-    }
+    var movie = await watchlistMovies.GetOrCreateMovieAsync(request);
 
     var alreadyOnList = await db.UserMovies
         .AnyAsync(um => um.UserId == dbUser.Id && um.MovieId == movie.Id);
@@ -234,14 +234,9 @@ app.MapPost("/api/watchlist", async (
     db.UserMovies.Add(userMovie);
     await db.SaveChangesAsync();
 
-    var response = new WatchlistItemResponse(
-        userMovie.Id,
-        movie.Title,
-        movie.ReleaseYear,
-        userMovie.Status,
-        userMovie.AddedAt);
+    userMovie.Movie = movie;
 
-    return Results.Created($"/api/watchlist/{userMovie.Id}", response);
+    return Results.Created($"/api/watchlist/{userMovie.Id}", WatchlistMapper.ToItem(userMovie));
 })
 .RequireAuthorization();
 
@@ -303,12 +298,7 @@ app.MapPatch("/api/watchlist/{id:int}", async (
     userMovie.Status = "watched";
     await db.SaveChangesAsync();
 
-    return Results.Ok(new WatchlistItemResponse(
-        userMovie.Id,
-        userMovie.Movie.Title,
-        userMovie.Movie.ReleaseYear,
-        userMovie.Status,
-        userMovie.AddedAt));
+    return Results.Ok(WatchlistMapper.ToItem(userMovie));
 })
 .RequireAuthorization();
 

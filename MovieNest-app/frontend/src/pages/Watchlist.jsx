@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addToWatchlist, fetchWatchlist, markAsWatched, removeFromWatchlist } from '../api';
+import ShelfMovieList from '../components/ShelfMovieList';
 
 export default function Watchlist() {
   const [items, setItems] = useState([]);
@@ -136,12 +137,11 @@ export default function Watchlist() {
       {error && <p className="error">{error}</p>}
 
       {!loading && items.length > 0 && (
-        <ul className="watchlist-items">
-          {items.map((item) => (
-            <li key={item.id}>
-              <strong>{item.title}</strong>
-              {item.releaseYear && ` (${item.releaseYear})`}
-              <span className="meta"> — added {new Date(item.addedAt).toLocaleString()}</span>
+        <ShelfMovieList
+          items={items}
+          dateLabel="added"
+          renderActions={(item) => (
+            <>
               <button
                 type="button"
                 onClick={() => handleMarkWatched(item.id)}
@@ -156,9 +156,9 @@ export default function Watchlist() {
               >
                 {removingId === item.id ? 'Removing…' : 'Remove'}
               </button>
-            </li>
-          ))}
-        </ul>
+            </>
+          )}
+        />
       )}
 
       {!loading && !error && items.length === 0 && (
