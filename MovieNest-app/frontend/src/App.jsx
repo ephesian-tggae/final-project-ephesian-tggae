@@ -5,6 +5,7 @@ import Discover from './pages/Discover';
 import History from './pages/History';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
+import Reviews from './pages/Reviews';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
 import Watchlist from './pages/Watchlist';
@@ -30,6 +31,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <History />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reviews"
+            element={
+              <ProtectedRoute>
+                <Reviews />
               </ProtectedRoute>
             }
           />

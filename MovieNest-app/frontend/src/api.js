@@ -184,3 +184,82 @@ export async function searchMovies(query) {
 
   return response.json();
 }
+
+export async function fetchReviews() {
+  const response = await fetch(`${apiBaseUrl}/api/reviews`, withCredentials);
+
+  if (response.status === 401) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createReview(title, rating, text, releaseYear = null) {
+  const response = await fetch(`${apiBaseUrl}/api/reviews`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title,
+      releaseYear: releaseYear || null,
+      rating,
+      text,
+    }),
+    ...withCredentials,
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function updateReview(id, rating, text) {
+  const response = await fetch(`${apiBaseUrl}/api/reviews/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rating, text }),
+    ...withCredentials,
+  });
+
+  if (response.status === 401) {
+    throw new Error('Not signed in');
+  }
+
+  if (response.status === 404) {
+    throw new Error('Review not found');
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteReview(id) {
+  const response = await fetch(`${apiBaseUrl}/api/reviews/${id}`, {
+    method: 'DELETE',
+    ...withCredentials,
+  });
+
+  if (response.status === 401) {
+    throw new Error('Not signed in');
+  }
+
+  if (response.status === 404) {
+    throw new Error('Review not found');
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Backend returned ${response.status}`);
+  }
+}

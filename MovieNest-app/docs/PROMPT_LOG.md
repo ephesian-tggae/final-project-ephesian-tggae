@@ -292,6 +292,29 @@ check whether the watchlist item exists and if it belongs to the signed in user.
 Tested when a signed in user gets 403 when trying to update and delete another user's watchlist item through the console
 when having the other user's watchlist item id.
 
+## Prompt 15: Review feature
+
+**Tool:** Cursor
+**Goal:** For signed in users to have the abilitty to create, view, update, and delete their own movie reviews.
+
+**Prompt:** "I want to add a Review feature to the app. I want signed in users to be able to write reviews for movies,
+see their own reviews, edit a review, and delete a review. Each review should belong to the signed in user only so
+one user should not be able to edit or delete another user's review. I expect the review to have the movie title, a rating
+from 1 to 5, optional review text, and created and updated dates.
+
+Add any backend database changes needed for reviews. Also add protected backend endpoints for creating, reading, updating,
+and deleting reviews. Add a simple protected react page for reviews. Keep the code simple and match the style like
+the other feature pages."
+
+**Result:** A page where you can write reviews for movies. Its also a protected review endpoint and protected react
+page so signed in users can manage their own reviews.
+
+**Accepted:** I kept the review model, review database, protected review endpoints, and react reviews page
+**Changes I made:** none
+**Rejected:** none
+**Tested:** While signed in I created a review, viewed it on the review page, edit it the rating and review text, then finally
+deleted it.
+
 ## Prompt :
 
 **Tool:** Cursor
@@ -336,7 +359,16 @@ when having the other user's watchlist item id.
 **Rejected:**
 **Tested:**
 
-# Prompt Log
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
 
 ## Prompt :
 
@@ -349,7 +381,16 @@ when having the other user's watchlist item id.
 **Rejected:**
 **Tested:**
 
-# Prompt Log
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
 
 ## Prompt :
 
@@ -362,7 +403,16 @@ when having the other user's watchlist item id.
 **Rejected:**
 **Tested:**
 
-# Prompt Log
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
 
 ## Prompt :
 
@@ -375,7 +425,214 @@ when having the other user's watchlist item id.
 **Rejected:**
 **Tested:**
 
-# Prompt Log
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
+
+## Prompt :
+
+**Tool:** Cursor
+**Goal:**
+**Prompt:** "..."
+**Result:**
+**Accepted:**
+**Changes I made:**
+**Rejected:**
+**Tested:**
 
 ## Prompt :
 

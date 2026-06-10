@@ -15,6 +15,8 @@ public class MovieNestDbContext : DbContext
 
     public DbSet<UserMovie> UserMovies => Set<UserMovie>();
 
+    public DbSet<Review> Reviews => Set<Review>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
@@ -38,5 +40,19 @@ public class MovieNestDbContext : DbContext
             .HasOne(um => um.Movie)
             .WithMany()
             .HasForeignKey(um => um.MovieId);
+
+        modelBuilder.Entity<Review>()
+            .HasIndex(r => new { r.UserId, r.MovieId })
+            .IsUnique();
+
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId);
+
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Movie)
+            .WithMany()
+            .HasForeignKey(r => r.MovieId);
     }
 }

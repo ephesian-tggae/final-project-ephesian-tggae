@@ -328,13 +328,21 @@
 }
 
 .watchlist-form input,
-.search-form input {
+.search-form input,
+.watchlist-form select,
+.watchlist-form textarea {
   padding: 0.65rem 0.75rem;
   font-size: 1rem;
   color: var(--mn-text);
   background: var(--mn-bg);
   border: 1px solid var(--mn-border);
   border-radius: 8px;
+  font-family: inherit;
+}
+
+.watchlist-form textarea {
+  resize: vertical;
+  min-height: 4.5rem;
 }
 
 .watchlist-form input::placeholder,
@@ -343,10 +351,33 @@
 }
 
 .watchlist-form input:focus,
-.search-form input:focus {
+.search-form input:focus,
+.watchlist-form select:focus,
+.watchlist-form textarea:focus {
   outline: none;
   border-color: var(--mn-accent);
   box-shadow: 0 0 0 2px rgba(232, 185, 35, 0.2);
+}
+
+.review-text {
+  margin: 0.5rem 0 0;
+  color: var(--mn-muted);
+  line-height: 1.5;
+}
+
+.review-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.review-edit label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: var(--mn-muted);
+  font-size: 0.9rem;
 }
 
 .discover-actions {

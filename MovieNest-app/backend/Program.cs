@@ -327,4 +327,151 @@ app.MapGet("/api/movies/search", async (string? q, TmdbService tmdb) =>
 })
 .RequireAuthorization();
 
+app.MapGet("/api/reviews", async (
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db) =>
+{
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var reviews = await db.Reviews
+        .Where(r => r.UserId == dbUser.Id)
+        .Include(r => r.Movie)
+        .OrderByDescending(r => r.CreatedAt)
+        .ToListAsync();
+
+    return Results.Ok(reviews.Select(ReviewMapper.ToResponse).ToList());
+})
+.RequireAuthorization();
+
+app.MapPost("/api/reviews", async (
+    CreateReviewRequest request,
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db,
+    WatchlistMovieService watchlistMovies) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Title))
+    {
+        return Results.BadRequest(new { message = "Title is required." });
+    }
+
+    if (request.Rating is < 1 or > 5)
+    {
+        return Results.BadRequest(new { message = "Rating must be between 1 and 5." });
+    }
+
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var movie = await watchlistMovies.GetOrCreateMovieAsync(
+        new AddWatchlistRequest(request.Title.Trim(), request.ReleaseYear, null, null));
+
+    var alreadyReviewed = await db.Reviews
+        .AnyAsync(r => r.UserId == dbUser.Id && r.MovieId == movie.Id);
+
+    if (alreadyReviewed)
+    {
+        return Results.Conflict(new { message = "You have already reviewed this movie." });
+    }
+
+    var now = DateTime.UtcNow;
+    var review = new Review
+    {
+        UserId = dbUser.Id,
+        MovieId = movie.Id,
+        Rating = request.Rating,
+        Text = string.IsNullOrWhiteSpace(request.Text) ? null : request.Text.Trim(),
+        CreatedAt = now,
+        UpdatedAt = now
+    };
+
+    db.Reviews.Add(review);
+    await db.SaveChangesAsync();
+
+    review.Movie = movie;
+
+    return Results.Created($"/api/reviews/{review.Id}", ReviewMapper.ToResponse(review));
+})
+.RequireAuthorization();
+
+app.MapPatch("/api/reviews/{id:int}", async (
+    int id,
+    UpdateReviewRequest request,
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db) =>
+{
+    if (request.Rating is < 1 or > 5)
+    {
+        return Results.BadRequest(new { message = "Rating must be between 1 and 5." });
+    }
+
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var review = await db.Reviews
+        .Include(r => r.Movie)
+        .FirstOrDefaultAsync(r => r.Id == id);
+
+    if (review is null)
+    {
+        return Results.NotFound();
+    }
+
+    if (review.UserId != dbUser.Id)
+    {
+        return Results.StatusCode(StatusCodes.Status403Forbidden);
+    }
+
+    review.Rating = request.Rating;
+    review.Text = string.IsNullOrWhiteSpace(request.Text) ? null : request.Text.Trim();
+    review.UpdatedAt = DateTime.UtcNow;
+    await db.SaveChangesAsync();
+
+    return Results.Ok(ReviewMapper.ToResponse(review));
+})
+.RequireAuthorization();
+
+app.MapDelete("/api/reviews/{id:int}", async (
+    int id,
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    MovieNestDbContext db) =>
+{
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var review = await db.Reviews.FirstOrDefaultAsync(r => r.Id == id);
+
+    if (review is null)
+    {
+        return Results.NotFound();
+    }
+
+    if (review.UserId != dbUser.Id)
+    {
+        return Results.StatusCode(StatusCodes.Status403Forbidden);
+    }
+
+    db.Reviews.Remove(review);
+    await db.SaveChangesAsync();
+
+    return Results.NoContent();
+})
+.RequireAuthorization();
+
 app.Run();
