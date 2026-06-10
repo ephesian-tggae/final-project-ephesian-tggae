@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { searchMovies } from '../api';
 import MovieResultList from '../components/MovieResultList';
+import SearchForm from '../components/SearchForm';
 import TmdbAttribution from '../components/TmdbAttribution';
 import { useWatchlistFromResults } from '../hooks/useWatchlistFromResults';
 
@@ -57,26 +58,18 @@ export default function Search() {
       </p>
       <TmdbAttribution />
 
-      <form className="search-form" onSubmit={handleSubmit}>
-        <label>
-          Movie title
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g. Inception"
-          />
-        </label>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Searching…' : 'Search'}
-        </button>
-      </form>
+      <SearchForm
+        query={query}
+        onQueryChange={(e) => setQuery(e.target.value)}
+        onSubmit={handleSubmit}
+        loading={loading}
+      />
 
       {error && <p className="error">{error}</p>}
       {watchlistError && <p className="error">{watchlistError}</p>}
       {successMessage && <p className="success">{successMessage}</p>}
 
-      {!loading && searched && results.length === 0 && !error && (
+      {!loading && searched && results.length === 0 && !error && query.trim() && (
         <p>No movies found for &ldquo;{query.trim()}&rdquo;.</p>
       )}
 

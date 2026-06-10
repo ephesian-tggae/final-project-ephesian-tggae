@@ -15,7 +15,7 @@ export default function ShelfMovieList({ items, renderActions, dateLabel = 'adde
           {item.posterUrl ? (
             <img
               src={item.posterUrl}
-              alt=""
+              alt={`${item.title} poster`}
               className="search-poster"
             />
           ) : (

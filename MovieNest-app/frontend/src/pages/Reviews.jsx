@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createReview, deleteReview, fetchReviews, updateReview } from '../api';
 import GenreTags from '../components/GenreTags';
+import MovieEntryForm from '../components/MovieEntryForm';
 import TmdbAttribution from '../components/TmdbAttribution';
 import TmdbImageCredit from '../components/TmdbImageCredit';
 import UserDataNote from '../components/UserDataNote';
+import { validateReviewEntry } from '../utils/validateMovieEntry';
 
 export default function Reviews() {
   const [items, setItems] = useState([]);
@@ -12,6 +14,7 @@ export default function Reviews() {
   const [releaseYear, setReleaseYear] = useState('');
   const [rating, setRating] = useState('5');
   const [text, setText] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -39,12 +42,37 @@ export default function Reviews() {
       .finally(() => setLoading(false));
   }, []);
 
+  function handleChange(field, value) {
+    if (field === 'title') {
+      setTitle(value);
+    } else if (field === 'releaseYear') {
+      setReleaseYear(value);
+    } else if (field === 'rating') {
+      setRating(value);
+    } else if (field === 'text') {
+      setText(value);
+    }
+
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
-    if (!title.trim()) {
+
+    const values = { title, releaseYear, rating, text };
+    const errors = validateReviewEntry(values);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
+    setFieldErrors({});
     setSaving(true);
     setError(null);
 
@@ -114,49 +142,16 @@ export default function Reviews() {
       <UserDataNote context="reviews" />
       <TmdbAttribution />
 
-      <form className="watchlist-form" onSubmit={handleSubmit}>
-        <label>
-          Movie title
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Inception"
-            required
-          />
-        </label>
-        <label>
-          Year (optional)
-          <input
-            type="number"
-            value={releaseYear}
-            onChange={(e) => setReleaseYear(e.target.value)}
-            placeholder="2010"
-          />
-        </label>
-        <label>
-          Rating (1–5)
-          <select value={rating} onChange={(e) => setRating(e.target.value)}>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
-        </label>
-        <label>
-          Review (optional)
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="What did you think?"
-            rows={3}
-          />
-        </label>
-        <button type="submit" disabled={saving}>
-          {saving ? 'Saving…' : 'Add review'}
-        </button>
-      </form>
+      <MovieEntryForm
+        mode="review"
+        values={{ title, releaseYear, rating, text }}
+        errors={fieldErrors}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
+        submitting={saving}
+        submitLabel="Add review"
+        submittingLabel="Saving…"
+      />
 
       {loading && <p>Loading your reviews…</p>}
       {error && <p className="error">{error}</p>}
@@ -168,7 +163,11 @@ export default function Reviews() {
           {items.map((item) => (
             <li key={item.id} className="watchlist-item">
               {item.posterUrl ? (
-                <img src={item.posterUrl} alt="" className="search-poster" />
+                <img
+                  src={item.posterUrl}
+                  alt={`${item.title} poster`}
+                  className="search-poster"
+                />
               ) : (
                 <div className="search-poster search-poster--empty">No poster</div>
               )}

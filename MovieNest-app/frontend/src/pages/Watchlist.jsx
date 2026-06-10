@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addToWatchlist, fetchWatchlist, markAsWatched, removeFromWatchlist } from '../api';
+import MovieEntryForm from '../components/MovieEntryForm';
 import ShelfMovieList from '../components/ShelfMovieList';
 import TmdbAttribution from '../components/TmdbAttribution';
 import UserDataNote from '../components/UserDataNote';
+import { validateWatchlistEntry } from '../utils/validateMovieEntry';
 
 export default function Watchlist() {
   const [items, setItems] = useState([]);
   const [title, setTitle] = useState('');
   const [releaseYear, setReleaseYear] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -27,19 +30,39 @@ export default function Watchlist() {
     return data;
   }
 
-  // Runs on every page load / browser refresh — fetches saved rows from SQLite via the API
   useEffect(() => {
     loadWatchlist()
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
 
+  function handleChange(field, value) {
+    if (field === 'title') {
+      setTitle(value);
+    } else if (field === 'releaseYear') {
+      setReleaseYear(value);
+    }
+
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
-    if (!title.trim()) {
+
+    const values = { title, releaseYear };
+    const errors = validateWatchlistEntry(values);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
+    setFieldErrors({});
     setSaving(true);
     setError(null);
 
@@ -108,30 +131,16 @@ export default function Watchlist() {
         results.
       </p>
 
-      <form className="watchlist-form" onSubmit={handleSubmit}>
-        <label>
-          Movie title
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Inception"
-            required
-          />
-        </label>
-        <label>
-          Year (optional)
-          <input
-            type="number"
-            value={releaseYear}
-            onChange={(e) => setReleaseYear(e.target.value)}
-            placeholder="2010"
-          />
-        </label>
-        <button type="submit" disabled={saving}>
-          {saving ? 'Saving…' : 'Add to watchlist'}
-        </button>
-      </form>
+      <MovieEntryForm
+        mode="watchlist"
+        values={{ title, releaseYear }}
+        errors={fieldErrors}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
+        submitting={saving}
+        submitLabel="Add to watchlist"
+        submittingLabel="Saving…"
+      />
 
       <button type="button" onClick={handleReload} disabled={loading}>
         Reload from database

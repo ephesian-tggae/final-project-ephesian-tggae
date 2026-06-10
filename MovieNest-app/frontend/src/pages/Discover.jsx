@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { fetchPopularMovies, searchPublicMovies, startLogin } from '../api';
 import { useAuth } from '../AuthContext';
 import MovieResultList from '../components/MovieResultList';
+import SearchForm from '../components/SearchForm';
 import TmdbAttribution from '../components/TmdbAttribution';
 import { useWatchlistFromResults } from '../hooks/useWatchlistFromResults';
 
@@ -78,25 +79,18 @@ export default function Discover() {
       </p>
       <TmdbAttribution />
 
-      <form className="search-form" onSubmit={handleSubmit}>
-        <label>
-          Search movies
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g. Inception"
-          />
-        </label>
-        <div className="discover-actions">
-          <button type="submit" disabled={loading}>
-            {loading ? 'Loading…' : 'Search'}
-          </button>
-          <button type="button" onClick={loadPopular} disabled={loading}>
-            Show popular
-          </button>
-        </div>
-      </form>
+      <SearchForm
+        query={query}
+        onQueryChange={(e) => setQuery(e.target.value)}
+        onSubmit={handleSubmit}
+        loading={loading}
+        loadingLabel="Loading…"
+        allowEmptySubmit
+        showPopularButton
+        onShowPopular={loadPopular}
+        popularDisabled={loading}
+        inputLabel="Search movies"
+      />
 
       {error && <p className="error">{error}</p>}
       {watchlistError && <p className="error">{watchlistError}</p>}

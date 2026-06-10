@@ -341,10 +341,35 @@
   font-weight: 500;
 }
 
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-field label {
+  color: var(--mn-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.required-mark {
+  font-weight: 400;
+}
+
+.field-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--mn-error);
+}
+
 .watchlist-form input,
 .search-form input,
+.form-field input,
 .watchlist-form select,
-.watchlist-form textarea {
+.form-field select,
+.watchlist-form textarea,
+.form-field textarea {
   padding: 0.65rem 0.75rem;
   font-size: 1rem;
   color: var(--mn-text);
@@ -360,14 +385,18 @@
 }
 
 .watchlist-form input::placeholder,
-.search-form input::placeholder {
+.search-form input::placeholder,
+.form-field input::placeholder {
   color: #6a6a78;
 }
 
 .watchlist-form input:focus,
 .search-form input:focus,
+.form-field input:focus,
 .watchlist-form select:focus,
-.watchlist-form textarea:focus {
+.form-field select:focus,
+.watchlist-form textarea:focus,
+.form-field textarea:focus {
   outline: none;
   border-color: var(--mn-accent);
   box-shadow: 0 0 0 2px rgba(232, 185, 35, 0.2);
