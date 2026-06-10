@@ -15,4 +15,5 @@ public record WatchlistItemResponse(
     string Status,
     DateTime AddedAt,
     string? PosterUrl,
-    IReadOnlyList<GenreResponse> Genres);
+    IReadOnlyList<GenreResponse> Genres,
+    int? TmdbId);

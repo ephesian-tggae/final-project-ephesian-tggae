@@ -284,6 +284,20 @@
   margin: 1rem 0;
 }
 
+.success {
+  color: #6ee7a0;
+  margin: 1rem 0;
+}
+
+.movie-result-actions {
+  margin-top: 0.65rem;
+}
+
+.movie-result-actions button {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+}
+
 .nav {
   display: flex;
   flex-wrap: wrap;

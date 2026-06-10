@@ -1,19 +1,33 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchPopularMovies, searchPublicMovies, startLogin } from '../api';
+import { useAuth } from '../AuthContext';
 import MovieResultList from '../components/MovieResultList';
 import TmdbAttribution from '../components/TmdbAttribution';
+import { useWatchlistFromResults } from '../hooks/useWatchlistFromResults';
 
 export default function Discover() {
+  const { user } = useAuth();
   const [movies, setMovies] = useState([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mode, setMode] = useState('popular');
 
+  const isSignedIn = Boolean(user);
+  const {
+    addedTmdbIds,
+    addingTmdbId,
+    successMessage,
+    watchlistError,
+    handleAddToWatchlist,
+    clearWatchlistMessages,
+  } = useWatchlistFromResults(isSignedIn);
+
   async function loadPopular() {
     setLoading(true);
     setError(null);
+    clearWatchlistMessages();
     setMode('popular');
 
     try {
@@ -41,6 +55,7 @@ export default function Discover() {
 
     setLoading(true);
     setError(null);
+    clearWatchlistMessages();
     setMode('search');
 
     try {
@@ -84,20 +99,35 @@ export default function Discover() {
       </form>
 
       {error && <p className="error">{error}</p>}
+      {watchlistError && <p className="error">{watchlistError}</p>}
+      {successMessage && <p className="success">{successMessage}</p>}
       {loading && <p>Loading movies…</p>}
 
       {!loading && mode === 'search' && movies.length === 0 && !error && (
         <p>No movies found for &ldquo;{query.trim()}&rdquo;.</p>
       )}
 
-      <MovieResultList movies={movies} />
+      {!loading && movies.length > 0 && !isSignedIn && (
+        <p className="data-attribution">Sign in to add movies to your watchlist.</p>
+      )}
 
-      <p className="discover-cta">
-        Want your own watchlist?{' '}
-        <button type="button" className="link-button" onClick={startLogin}>
-          Log in with Google
-        </button>
-      </p>
+      <MovieResultList
+        movies={movies}
+        isSignedIn={isSignedIn}
+        onAddToWatchlist={handleAddToWatchlist}
+        onSignInToSave={startLogin}
+        addingTmdbId={addingTmdbId}
+        addedTmdbIds={addedTmdbIds}
+      />
+
+      {!isSignedIn && (
+        <p className="discover-cta">
+          Want your own watchlist?{' '}
+          <button type="button" className="link-button" onClick={startLogin}>
+            Log in with Google
+          </button>
+        </p>
+      )}
 
       <Link to="/">← Back to home</Link>
     </main>

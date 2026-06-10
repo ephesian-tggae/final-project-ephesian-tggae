@@ -13,5 +13,6 @@ public static class WatchlistMapper
             userMovie.Status,
             userMovie.AddedAt,
             TmdbService.ToPosterUrl(userMovie.Movie.PosterPath),
-            GenreMapper.ToGenres(userMovie.Movie));
+            GenreMapper.ToGenres(userMovie.Movie),
+            userMovie.Movie.TmdbId > 0 ? userMovie.Movie.TmdbId : null);
 }

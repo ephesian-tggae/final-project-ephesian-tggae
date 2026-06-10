@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { searchMovies } from '../api';
 import MovieResultList from '../components/MovieResultList';
 import TmdbAttribution from '../components/TmdbAttribution';
+import { useWatchlistFromResults } from '../hooks/useWatchlistFromResults';
 
 export default function Search() {
   const [query, setQuery] = useState('');
@@ -10,6 +11,15 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searched, setSearched] = useState(false);
+
+  const {
+    addedTmdbIds,
+    addingTmdbId,
+    successMessage,
+    watchlistError,
+    handleAddToWatchlist,
+    clearWatchlistMessages,
+  } = useWatchlistFromResults(true);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -20,6 +30,7 @@ export default function Search() {
 
     setLoading(true);
     setError(null);
+    clearWatchlistMessages();
     setSearched(true);
 
     try {
@@ -62,12 +73,20 @@ export default function Search() {
       </form>
 
       {error && <p className="error">{error}</p>}
+      {watchlistError && <p className="error">{watchlistError}</p>}
+      {successMessage && <p className="success">{successMessage}</p>}
 
       {!loading && searched && results.length === 0 && !error && (
         <p>No movies found for &ldquo;{query.trim()}&rdquo;.</p>
       )}
 
-      <MovieResultList movies={results} />
+      <MovieResultList
+        movies={results}
+        isSignedIn
+        onAddToWatchlist={handleAddToWatchlist}
+        addingTmdbId={addingTmdbId}
+        addedTmdbIds={addedTmdbIds}
+      />
 
       <Link to="/">← Back to home</Link>
     </main>

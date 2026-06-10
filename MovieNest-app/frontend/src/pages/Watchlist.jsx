@@ -103,6 +103,10 @@ export default function Watchlist() {
       <h1>Watchlist</h1>
       <UserDataNote context="watchlist" />
       <TmdbAttribution />
+      <p className="data-attribution">
+        Tip: add movies faster from Discover or Search using Add to watchlist on TMDB
+        results.
+      </p>
 
       <form className="watchlist-form" onSubmit={handleSubmit}>
         <label>

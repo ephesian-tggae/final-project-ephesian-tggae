@@ -106,8 +106,8 @@ App: `http://localhost:5173`
 1. Open `http://localhost:5173`
 2. Click **Log in with Google** → complete OAuth → return to the app
 3. Visit **Watchlist**, **Search**, **Profile**, **Settings** (protected routes)
-4. On **Search**, search a movie (e.g. `Inception`) — TMDB results with poster and overview
-5. On **Watchlist**, add a movie, **Mark as watched**, or **Remove**
+4. On **Search** or **Discover** (signed in), search a movie (e.g. `Inception`) — click **Add to watchlist** on a TMDB result
+5. On **Watchlist**, confirm the movie appears with poster and genres; **Mark as watched**, or **Remove**
 
 Health check (no login): `http://localhost:5102/api/health`
 
@@ -203,6 +203,6 @@ Deployed URL and CI badge will be added when Milestone 4 deployment is complete.
 
 ## Known limitations
 
-- Watchlist add form accepts manual titles (TMDB search is not yet connected to watchlist add).
-- No reviews, recommendations, or watched-history page yet.
+- No movie detail page or recommendation engine yet.
+- Manual watchlist form still accepts typed titles (TMDB enrichment runs on the backend).
 - Seed data is in the database for scale; the UI only shows the signed-in user’s own watchlist.
