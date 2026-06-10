@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { searchMovies } from '../api';
 import MovieResultList from '../components/MovieResultList';
+import TmdbAttribution from '../components/TmdbAttribution';
 
 export default function Search() {
   const [query, setQuery] = useState('');
@@ -41,8 +42,9 @@ export default function Search() {
     <main className="page search-page">
       <h1>Search</h1>
       <p className="subtitle">
-        Search movies from TMDB. Movie data and posters from TMDB.
+        Search movies — results are live from TMDB while you are signed in.
       </p>
+      <TmdbAttribution />
 
       <form className="search-form" onSubmit={handleSubmit}>
         <label>

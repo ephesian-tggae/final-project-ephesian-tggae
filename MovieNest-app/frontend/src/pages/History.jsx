@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchHistory } from '../api';
 import ShelfMovieList from '../components/ShelfMovieList';
+import TmdbAttribution from '../components/TmdbAttribution';
+import UserDataNote from '../components/UserDataNote';
 
 export default function History() {
   const [items, setItems] = useState([]);
@@ -26,7 +28,8 @@ export default function History() {
   return (
     <main className="page">
       <h1>Watched history</h1>
-      <p className="subtitle">Movies you have marked as watched.</p>
+      <UserDataNote context="history" />
+      <TmdbAttribution />
 
       {loading && <p>Loading your watched movies…</p>}
       {error && <p className="error">{error}</p>}

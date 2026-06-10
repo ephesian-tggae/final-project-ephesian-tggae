@@ -9,6 +9,7 @@ import Reviews from './pages/Reviews';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
 import Watchlist from './pages/Watchlist';
+import AppFooter from './components/AppFooter';
 import './App.css';
 
 function App() {
@@ -67,6 +68,7 @@ function App() {
             }
           />
         </Routes>
+        <AppFooter />
       </AuthProvider>
     </BrowserRouter>
   );

@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createReview, deleteReview, fetchReviews, updateReview } from '../api';
 import GenreTags from '../components/GenreTags';
+import TmdbAttribution from '../components/TmdbAttribution';
+import TmdbImageCredit from '../components/TmdbImageCredit';
+import UserDataNote from '../components/UserDataNote';
 
 export default function Reviews() {
   const [items, setItems] = useState([]);
@@ -108,7 +111,8 @@ export default function Reviews() {
   return (
     <main className="page">
       <h1>Reviews</h1>
-      <p className="subtitle">Rate and review movies you have watched.</p>
+      <UserDataNote context="reviews" />
+      <TmdbAttribution />
 
       <form className="watchlist-form" onSubmit={handleSubmit}>
         <label>
@@ -158,6 +162,8 @@ export default function Reviews() {
       {error && <p className="error">{error}</p>}
 
       {!loading && items.length > 0 && (
+        <>
+        <TmdbImageCredit />
         <ul className="watchlist-items">
           {items.map((item) => (
             <li key={item.id} className="watchlist-item">
@@ -170,7 +176,7 @@ export default function Reviews() {
                 <strong>{item.title}</strong>
                 {item.releaseYear && <span> ({item.releaseYear})</span>}
                 <GenreTags genres={item.genres} />
-                <span className="meta">Rating: {item.rating} / 5</span>
+                <span className="meta">Your rating: {item.rating} / 5</span>
                 {editingId === item.id ? (
                   <div className="review-edit">
                     <label>
@@ -207,7 +213,12 @@ export default function Reviews() {
                   </div>
                 ) : (
                   <>
-                    {item.text && <p className="review-text">{item.text}</p>}
+                    {item.text && (
+                      <>
+                        <span className="meta">Your review:</span>
+                        <p className="review-text">{item.text}</p>
+                      </>
+                    )}
                     <span className="meta">
                       Posted {new Date(item.createdAt).toLocaleString()}
                       {item.updatedAt !== item.createdAt &&
@@ -233,6 +244,7 @@ export default function Reviews() {
             </li>
           ))}
         </ul>
+        </>
       )}
 
       {!loading && !error && items.length === 0 && (

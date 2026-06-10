@@ -1,4 +1,5 @@
 import GenreTags from './GenreTags';
+import TmdbImageCredit from './TmdbImageCredit';
 
 export default function ShelfMovieList({ items, renderActions, dateLabel = 'added' }) {
   if (items.length === 0) {
@@ -6,6 +7,8 @@ export default function ShelfMovieList({ items, renderActions, dateLabel = 'adde
   }
 
   return (
+    <>
+    <TmdbImageCredit />
     <ul className="watchlist-items">
       {items.map((item) => (
         <li key={item.id} className="watchlist-item">
@@ -30,5 +33,6 @@ export default function ShelfMovieList({ items, renderActions, dateLabel = 'adde
         </li>
       ))}
     </ul>
+    </>
   );
 }

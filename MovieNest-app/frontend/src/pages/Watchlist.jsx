@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addToWatchlist, fetchWatchlist, markAsWatched, removeFromWatchlist } from '../api';
 import ShelfMovieList from '../components/ShelfMovieList';
+import TmdbAttribution from '../components/TmdbAttribution';
+import UserDataNote from '../components/UserDataNote';
 
 export default function Watchlist() {
   const [items, setItems] = useState([]);
@@ -99,10 +101,8 @@ export default function Watchlist() {
   return (
     <main className="page">
       <h1>Watchlist</h1>
-      <p className="subtitle">
-        Saved in the database. Refresh the page or restart the backend — your list
-        loads again from <code>GET /api/watchlist</code>.
-      </p>
+      <UserDataNote context="watchlist" />
+      <TmdbAttribution />
 
       <form className="watchlist-form" onSubmit={handleSubmit}>
         <label>

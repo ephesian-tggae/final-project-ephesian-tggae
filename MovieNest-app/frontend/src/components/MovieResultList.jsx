@@ -1,4 +1,5 @@
 import GenreTags from './GenreTags';
+import TmdbImageCredit from './TmdbImageCredit';
 
 export default function MovieResultList({ movies }) {
   if (movies.length === 0) {
@@ -6,6 +7,8 @@ export default function MovieResultList({ movies }) {
   }
 
   return (
+    <>
+    <TmdbImageCredit />
     <ul className="search-results">
       {movies.map((movie) => (
         <li key={movie.tmdbId} className="search-result">
@@ -25,5 +28,6 @@ export default function MovieResultList({ movies }) {
         </li>
       ))}
     </ul>
+    </>
   );
 }

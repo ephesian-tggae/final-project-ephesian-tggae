@@ -22,6 +22,9 @@ export default function Home() {
           A community movie platform for fans who want one place to discover films,
           build watchlists, track what they have watched, and share reviews.
         </p>
+        <p className="data-attribution landing-tmdb-note">
+          Discover and search powered by TMDB.
+        </p>
       </header>
 
       {error && <p className="error">Error: {error}</p>}

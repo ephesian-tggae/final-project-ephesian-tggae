@@ -524,6 +524,60 @@
   border-radius: 10px;
 }
 
+/* —— Data attribution —— */
+.data-attribution,
+.tmdb-image-credit,
+.user-data-note {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--mn-muted);
+}
+
+.user-data-note {
+  font-weight: 500;
+  color: var(--mn-text);
+}
+
+.tmdb-image-credit {
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.landing-tmdb-note {
+  margin-top: 1rem;
+}
+
+.app-footer {
+  margin: 0 auto;
+  padding: 1.5rem 1.75rem 2rem;
+  max-width: 44rem;
+  border-top: 1px solid var(--mn-border);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--mn-muted);
+  text-align: left;
+}
+
+.app-footer .tmdb-footer {
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+}
+
+.app-footer .tmdb-legal {
+  margin: 0;
+}
+
+.app-footer a {
+  color: var(--mn-accent);
+  text-decoration: none;
+}
+
+.app-footer a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 520px) {
   .page {
     padding: 2rem 1.25rem 3rem;

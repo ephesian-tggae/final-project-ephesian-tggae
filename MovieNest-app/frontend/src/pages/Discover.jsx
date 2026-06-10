@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchPopularMovies, searchPublicMovies, startLogin } from '../api';
 import MovieResultList from '../components/MovieResultList';
+import TmdbAttribution from '../components/TmdbAttribution';
 
 export default function Discover() {
   const [movies, setMovies] = useState([]);
@@ -57,9 +58,10 @@ export default function Discover() {
     <main className="page discover-page">
       <h1>Discover movies</h1>
       <p className="subtitle">
-        Browse popular films from TMDB. No account required to look around — sign in to
-        save a watchlist. Movie data and posters from TMDB.
+        Browse and search popular films — results are live from TMDB. No account
+        required to look around; sign in to save movies to your personal watchlist.
       </p>
+      <TmdbAttribution />
 
       <form className="search-form" onSubmit={handleSubmit}>
         <label>

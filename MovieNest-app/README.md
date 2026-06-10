@@ -188,6 +188,12 @@ Reseed typically takes a few seconds on a laptop.
 - **Auth:** Google OAuth (cookie sessions)
 - **External API:** TMDB (movie search); genres are fetched from TMDB and stored on `Movie` via `MovieGenre`
 
+## Data sources
+
+- **Movie metadata, genres, and posters:** TMDB (live fetch on Discover/Search; cached in the database when you add to watchlist or write a review)
+- **Watchlist, history, ratings, and reviews:** user-owned data stored in the MovieNest database
+- **Poster image URLs:** served from `image.tmdb.org`
+
 ## Deployment (planned)
 
 - **Frontend:** Vercel
