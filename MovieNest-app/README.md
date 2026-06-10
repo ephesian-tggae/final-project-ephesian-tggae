@@ -186,7 +186,7 @@ Reseed typically takes a few seconds on a laptop.
 - **Backend:** ASP.NET Core, EF Core, SQLite (local) / PostgreSQL (production planned)
 - **Frontend:** Vite + React, React Router
 - **Auth:** Google OAuth (cookie sessions)
-- **External API:** TMDB (movie search)
+- **External API:** TMDB (movie search); genres are fetched from TMDB and stored on `Movie` via `MovieGenre`
 
 ## Deployment (planned)
 

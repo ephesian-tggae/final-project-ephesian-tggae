@@ -28,6 +28,7 @@ if (isSeedCommand)
 
 builder.Services.AddScoped<UserSyncService>();
 builder.Services.AddScoped<CurrentUserService>();
+builder.Services.AddScoped<GenreService>();
 builder.Services.AddScoped<WatchlistMovieService>();
 builder.Services.AddHttpClient<TmdbService>();
 
@@ -134,6 +135,16 @@ app.MapGet("/api/public/movies/search", async (string? q, TmdbService tmdb) =>
     return Results.Ok(results);
 });
 
+app.MapGet("/api/public/genres", async (MovieNestDbContext db) =>
+{
+    var genres = await db.Genres
+        .OrderBy(g => g.Name)
+        .Select(g => new GenreResponse(g.TmdbGenreId, g.Name))
+        .ToListAsync();
+
+    return Results.Ok(genres);
+});
+
 app.MapGet("/api/auth/login", () =>
     Results.Challenge(
         new AuthenticationProperties { RedirectUri = frontendUrl },
@@ -167,6 +178,8 @@ app.MapGet("/api/watchlist", async (
     var items = await db.UserMovies
         .Where(um => um.UserId == dbUser.Id && um.Status == "watchlist")
         .Include(um => um.Movie)
+            .ThenInclude(m => m.MovieGenres)
+            .ThenInclude(mg => mg.Genre)
         .OrderByDescending(um => um.AddedAt)
         .ToListAsync();
 
@@ -188,6 +201,8 @@ app.MapGet("/api/history", async (
     var items = await db.UserMovies
         .Where(um => um.UserId == dbUser.Id && um.Status == "watched")
         .Include(um => um.Movie)
+            .ThenInclude(m => m.MovieGenres)
+            .ThenInclude(mg => mg.Genre)
         .OrderByDescending(um => um.AddedAt)
         .ToListAsync();
 
@@ -234,7 +249,10 @@ app.MapPost("/api/watchlist", async (
     db.UserMovies.Add(userMovie);
     await db.SaveChangesAsync();
 
-    userMovie.Movie = movie;
+    userMovie.Movie = await db.Movies
+        .Include(m => m.MovieGenres)
+            .ThenInclude(mg => mg.Genre)
+        .FirstAsync(m => m.Id == movie.Id);
 
     return Results.Created($"/api/watchlist/{userMovie.Id}", WatchlistMapper.ToItem(userMovie));
 })
@@ -291,6 +309,8 @@ app.MapPatch("/api/watchlist/{id:int}", async (
 
     var userMovie = await db.UserMovies
         .Include(um => um.Movie)
+            .ThenInclude(m => m.MovieGenres)
+            .ThenInclude(mg => mg.Genre)
         .FirstOrDefaultAsync(um => um.Id == id);
 
     if (userMovie is null)
@@ -327,6 +347,18 @@ app.MapGet("/api/movies/search", async (string? q, TmdbService tmdb) =>
 })
 .RequireAuthorization();
 
+app.MapGet("/api/movies/{tmdbId:int}/genres", async (int tmdbId, TmdbService tmdb) =>
+{
+    if (tmdbId <= 0)
+    {
+        return Results.BadRequest(new { message = "Invalid TMDB id." });
+    }
+
+    var genres = await tmdb.GetMovieGenresAsync(tmdbId);
+    return Results.Ok(genres);
+})
+.RequireAuthorization();
+
 app.MapGet("/api/reviews", async (
     ClaimsPrincipal user,
     CurrentUserService currentUser,
@@ -341,6 +373,8 @@ app.MapGet("/api/reviews", async (
     var reviews = await db.Reviews
         .Where(r => r.UserId == dbUser.Id)
         .Include(r => r.Movie)
+            .ThenInclude(m => m.MovieGenres)
+            .ThenInclude(mg => mg.Genre)
         .OrderByDescending(r => r.CreatedAt)
         .ToListAsync();
 
@@ -422,6 +456,8 @@ app.MapPatch("/api/reviews/{id:int}", async (
 
     var review = await db.Reviews
         .Include(r => r.Movie)
+            .ThenInclude(m => m.MovieGenres)
+            .ThenInclude(mg => mg.Genre)
         .FirstOrDefaultAsync(r => r.Id == id);
 
     if (review is null)

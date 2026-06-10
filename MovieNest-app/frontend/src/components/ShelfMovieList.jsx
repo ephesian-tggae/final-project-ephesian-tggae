@@ -1,3 +1,5 @@
+import GenreTags from './GenreTags';
+
 export default function ShelfMovieList({ items, renderActions, dateLabel = 'added' }) {
   if (items.length === 0) {
     return null;
@@ -19,6 +21,7 @@ export default function ShelfMovieList({ items, renderActions, dateLabel = 'adde
           <div className="watchlist-item-details">
             <strong>{item.title}</strong>
             {item.releaseYear && <span> ({item.releaseYear})</span>}
+            <GenreTags genres={item.genres} />
             <span className="meta">
               — {dateLabel} {new Date(item.addedAt).toLocaleString()}
             </span>

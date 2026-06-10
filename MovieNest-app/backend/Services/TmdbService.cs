@@ -8,6 +8,7 @@ public class TmdbService
     private const string ImageBaseUrl = "https://image.tmdb.org/t/p/w185";
     private readonly HttpClient _http;
     private readonly string _apiKey;
+    private Dictionary<int, string>? _genreMap;
 
     public TmdbService(HttpClient http, IConfiguration configuration)
     {
@@ -42,6 +43,39 @@ public class TmdbService
         return results.FirstOrDefault();
     }
 
+    public async Task<IReadOnlyList<GenreResponse>> GetMovieGenresAsync(
+        int tmdbId,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _http.GetAsync(
+            $"movie/{tmdbId}?api_key={_apiKey}",
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<TmdbMovieDetailsResponse>(
+            cancellationToken: cancellationToken);
+
+        if (payload?.Genres is null)
+        {
+            return [];
+        }
+
+        return payload.Genres
+            .Select(g => new GenreResponse(g.Id, g.Name))
+            .OrderBy(g => g.Name)
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<GenreResponse>> GetMovieGenreListAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var map = await GetGenreMapAsync(cancellationToken);
+        return map
+            .Select(pair => new GenreResponse(pair.Key, pair.Value))
+            .OrderBy(g => g.Name)
+            .ToList();
+    }
+
     public static string? ToPosterUrl(string? posterPathOrUrl)
     {
         if (string.IsNullOrWhiteSpace(posterPathOrUrl))
@@ -73,12 +107,39 @@ public class TmdbService
             return [];
         }
 
+        var genreMap = await GetGenreMapAsync(cancellationToken);
+
         return payload.Results
-            .Select(MapResult)
+            .Select(movie => MapResult(movie, genreMap))
             .ToList();
     }
 
-    private static MovieSearchResultResponse MapResult(TmdbMovieResult movie)
+    private async Task<Dictionary<int, string>> GetGenreMapAsync(
+        CancellationToken cancellationToken)
+    {
+        if (_genreMap is not null)
+        {
+            return _genreMap;
+        }
+
+        var response = await _http.GetAsync(
+            $"genre/movie/list?api_key={_apiKey}",
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<TmdbGenreListResponse>(
+            cancellationToken: cancellationToken);
+
+        _genreMap = payload?.Genres?
+            .ToDictionary(g => g.Id, g => g.Name)
+            ?? new Dictionary<int, string>();
+
+        return _genreMap;
+    }
+
+    private static MovieSearchResultResponse MapResult(
+        TmdbMovieResult movie,
+        IReadOnlyDictionary<int, string> genreMap)
     {
         int? releaseYear = null;
         if (!string.IsNullOrEmpty(movie.ReleaseDate)
@@ -93,12 +154,19 @@ public class TmdbService
 
         var overview = string.IsNullOrWhiteSpace(movie.Overview) ? null : movie.Overview.Trim();
 
+        var genres = (movie.GenreIds ?? [])
+            .Where(genreMap.ContainsKey)
+            .Select(id => new GenreResponse(id, genreMap[id]))
+            .OrderBy(g => g.Name)
+            .ToList();
+
         return new MovieSearchResultResponse(
             movie.Id,
             movie.Title,
             releaseYear,
             posterUrl,
-            overview);
+            overview,
+            genres);
     }
 
     private sealed class TmdbSearchResponse
@@ -123,5 +191,29 @@ public class TmdbService
 
         [JsonPropertyName("overview")]
         public string? Overview { get; set; }
+
+        [JsonPropertyName("genre_ids")]
+        public List<int>? GenreIds { get; set; }
+    }
+
+    private sealed class TmdbGenreListResponse
+    {
+        [JsonPropertyName("genres")]
+        public List<TmdbGenreItem>? Genres { get; set; }
+    }
+
+    private sealed class TmdbGenreItem
+    {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class TmdbMovieDetailsResponse
+    {
+        [JsonPropertyName("genres")]
+        public List<TmdbGenreItem>? Genres { get; set; }
     }
 }

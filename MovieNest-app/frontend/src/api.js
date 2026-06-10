@@ -157,6 +157,16 @@ export async function fetchPopularMovies() {
   return response.json();
 }
 
+export async function fetchPublicGenres() {
+  const response = await fetch(`${apiBaseUrl}/api/public/genres`);
+
+  if (!response.ok) {
+    throw new Error(`Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export async function searchPublicMovies(query) {
   const params = new URLSearchParams({ q: query });
   const response = await fetch(`${apiBaseUrl}/api/public/movies/search?${params}`);

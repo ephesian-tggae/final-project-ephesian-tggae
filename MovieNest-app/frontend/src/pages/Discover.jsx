@@ -58,7 +58,7 @@ export default function Discover() {
       <h1>Discover movies</h1>
       <p className="subtitle">
         Browse popular films from TMDB. No account required to look around — sign in to
-        save a watchlist.
+        save a watchlist. Movie data and posters from TMDB.
       </p>
 
       <form className="search-form" onSubmit={handleSubmit}>

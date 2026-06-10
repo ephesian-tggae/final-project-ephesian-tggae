@@ -14,5 +14,6 @@ public static class ReviewMapper
             review.Text,
             review.CreatedAt,
             review.UpdatedAt,
-            TmdbService.ToPosterUrl(review.Movie.PosterPath));
+            TmdbService.ToPosterUrl(review.Movie.PosterPath),
+            GenreMapper.ToGenres(review.Movie));
 }

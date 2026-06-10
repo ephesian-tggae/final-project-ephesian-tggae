@@ -12,5 +12,6 @@ public static class WatchlistMapper
             userMovie.Movie.ReleaseYear,
             userMovie.Status,
             userMovie.AddedAt,
-            TmdbService.ToPosterUrl(userMovie.Movie.PosterPath));
+            TmdbService.ToPosterUrl(userMovie.Movie.PosterPath),
+            GenreMapper.ToGenres(userMovie.Movie));
 }

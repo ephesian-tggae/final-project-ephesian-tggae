@@ -14,4 +14,5 @@ public record WatchlistItemResponse(
     int? ReleaseYear,
     string Status,
     DateTime AddedAt,
-    string? PosterUrl);
+    string? PosterUrl,
+    IReadOnlyList<GenreResponse> Genres);

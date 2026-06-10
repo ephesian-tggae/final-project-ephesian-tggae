@@ -5,4 +5,5 @@ public record MovieSearchResultResponse(
     string Title,
     int? ReleaseYear,
     string? PosterUrl,
-    string? Overview);
+    string? Overview,
+    IReadOnlyList<GenreResponse> Genres);

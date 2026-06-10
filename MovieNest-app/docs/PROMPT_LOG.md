@@ -315,16 +315,31 @@ page so signed in users can manage their own reviews.
 **Tested:** While signed in I created a review, viewed it on the review page, edit it the rating and review text, then finally
 deleted it.
 
-## Prompt :
+## Prompt 16: Genre
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** So movies can show categories like Action, Comedey, Drama, or Horro.
+
+**Prompt:** "I want to add Genre to the app. I expect movies to be able to have genres like Action or Horror where it comes
+from TMDB when the data is brought into the app. Add the backend database changes needed so movies can be connected
+to genres. A movie can have more than one genre, and the same genre can belong to many movies
+
+When movies are searched, added to the watchlist, or used in reviews, try to save and show their genres too. Update the
+UI so movie cards can show genre tags when genre data is available. This can show up in places like search results, discover
+movies, watchlist items, or reviews if those pages already show movies cards. Also add a simple public backend endpoint
+that can return the list of genres saved in the database
+
+Make sure the code is simple and only chnage what is needed for genres"
+
+**Result:** Added backend database changes so movies can be connected to the genres. The UI is updated so now there
+are genre tags that appear on movie cards when seen.
+
+**Accepted:** I kpet the genre database changes, the movie to genre connection, and the UI genre tags because they
+function the way I wanted them too
+
+**Changes I made:** none
+**Rejected:**none
+**Tested:** Tested by going through pages like watchlist to see the genre tags of movies on my list.
 
 ## Prompt :
 

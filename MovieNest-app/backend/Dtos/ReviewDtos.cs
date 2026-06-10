@@ -18,4 +18,5 @@ public record ReviewResponse(
     string? Text,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    string? PosterUrl);
+    string? PosterUrl,
+    IReadOnlyList<GenreResponse> Genres);

@@ -1,3 +1,5 @@
+import GenreTags from './GenreTags';
+
 export default function MovieResultList({ movies }) {
   if (movies.length === 0) {
     return null;
@@ -15,6 +17,7 @@ export default function MovieResultList({ movies }) {
           <div className="search-result-details">
             <strong>{movie.title}</strong>
             {movie.releaseYear && <span> ({movie.releaseYear})</span>}
+            <GenreTags genres={movie.genres} />
             {movie.overview && (
               <p className="search-overview">{movie.overview}</p>
             )}

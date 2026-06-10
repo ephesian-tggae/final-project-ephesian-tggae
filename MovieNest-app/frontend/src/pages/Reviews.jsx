@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createReview, deleteReview, fetchReviews, updateReview } from '../api';
+import GenreTags from '../components/GenreTags';
 
 export default function Reviews() {
   const [items, setItems] = useState([]);
@@ -168,6 +169,7 @@ export default function Reviews() {
               <div className="watchlist-item-details">
                 <strong>{item.title}</strong>
                 {item.releaseYear && <span> ({item.releaseYear})</span>}
+                <GenreTags genres={item.genres} />
                 <span className="meta">Rating: {item.rating} / 5</span>
                 {editingId === item.id ? (
                   <div className="review-edit">

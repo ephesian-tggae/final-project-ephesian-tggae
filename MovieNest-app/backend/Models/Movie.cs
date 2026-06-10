@@ -11,5 +11,7 @@ public class Movie
     public string? PosterPath { get; set; }
 
     public int? ReleaseYear { get; set; }
+
+    public ICollection<MovieGenre> MovieGenres { get; set; } = [];
 }
 

@@ -9,11 +9,16 @@ public class WatchlistMovieService
 {
     private readonly MovieNestDbContext _db;
     private readonly TmdbService _tmdb;
+    private readonly GenreService _genres;
 
-    public WatchlistMovieService(MovieNestDbContext db, TmdbService tmdb)
+    public WatchlistMovieService(
+        MovieNestDbContext db,
+        TmdbService tmdb,
+        GenreService genres)
     {
         _db = db;
         _tmdb = tmdb;
+        _genres = genres;
     }
 
     public async Task<Movie> GetOrCreateMovieAsync(
@@ -36,6 +41,7 @@ public class WatchlistMovieService
         if (movie is not null)
         {
             await TryEnrichPosterAsync(movie, title, request.PosterPath, cancellationToken);
+            await TrySyncGenresAsync(movie, cancellationToken);
             return movie;
         }
 
@@ -49,6 +55,7 @@ public class WatchlistMovieService
             if (byTmdb is not null)
             {
                 await TryEnrichPosterAsync(byTmdb, title, match.PosterUrl, cancellationToken);
+                await _genres.SyncGenresForMovieAsync(byTmdb, match.TmdbId, cancellationToken);
                 return byTmdb;
             }
 
@@ -61,6 +68,7 @@ public class WatchlistMovieService
             };
             _db.Movies.Add(movie);
             await _db.SaveChangesAsync(cancellationToken);
+            await _genres.SyncGenresForMovieAsync(movie, match.TmdbId, cancellationToken);
             return movie;
         }
 
@@ -92,6 +100,7 @@ public class WatchlistMovieService
         if (movie is not null)
         {
             await TryEnrichPosterAsync(movie, title, posterPath, cancellationToken);
+            await _genres.SyncGenresForMovieAsync(movie, tmdbId, cancellationToken);
             return movie;
         }
 
@@ -104,6 +113,7 @@ public class WatchlistMovieService
         };
         _db.Movies.Add(movie);
         await _db.SaveChangesAsync(cancellationToken);
+        await _genres.SyncGenresForMovieAsync(movie, tmdbId, cancellationToken);
         return movie;
     }
 
@@ -132,5 +142,13 @@ public class WatchlistMovieService
 
         movie.PosterPath = resolvedPoster;
         await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task TrySyncGenresAsync(Movie movie, CancellationToken cancellationToken)
+    {
+        if (movie.TmdbId > 0)
+        {
+            await _genres.SyncGenresForMovieAsync(movie, movie.TmdbId, cancellationToken);
+        }
     }
 }
