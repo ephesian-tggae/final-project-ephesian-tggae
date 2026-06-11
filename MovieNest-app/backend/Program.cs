@@ -2,9 +2,12 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieNest.Api.Data;
 using MovieNest.Api.Dtos;
+using MovieNest.Api.Infrastructure;
+using MovieNest.Api.Middleware;
 using MovieNest.Api.Models;
 using MovieNest.Api.Services;
 
@@ -86,6 +89,9 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<ApiErrorResponseEnrichmentMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -96,6 +102,8 @@ app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<ApiErrorResponseEnrichmentMiddleware>();
 
 var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:5173";
 
@@ -124,16 +132,14 @@ app.MapGet("/api/public/movies/popular", async (TmdbService tmdb) =>
     return Results.Ok(results);
 });
 
-app.MapGet("/api/public/movies/search", async (string? q, TmdbService tmdb) =>
+app.MapGet("/api/public/movies/search", async (
+    [AsParameters] SearchMoviesQuery query,
+    TmdbService tmdb) =>
 {
-    if (string.IsNullOrWhiteSpace(q))
-    {
-        return Results.BadRequest(new { message = "Query parameter q is required." });
-    }
-
-    var results = await tmdb.SearchMoviesAsync(q.Trim());
+    var results = await tmdb.SearchMoviesAsync(query.Q!.Trim());
     return Results.Ok(results);
-});
+})
+.WithValidation();
 
 app.MapGet("/api/public/genres", async (MovieNestDbContext db) =>
 {
@@ -172,7 +178,7 @@ app.MapGet("/api/watchlist", async (
     var dbUser = await currentUser.GetUserAsync(user);
     if (dbUser is null)
     {
-        return Results.Unauthorized();
+        ApiErrors.Unauthorized();
     }
 
     var items = await db.UserMovies
@@ -195,7 +201,7 @@ app.MapGet("/api/history", async (
     var dbUser = await currentUser.GetUserAsync(user);
     if (dbUser is null)
     {
-        return Results.Unauthorized();
+        ApiErrors.Unauthorized();
     }
 
     var items = await db.UserMovies
@@ -217,15 +223,10 @@ app.MapPost("/api/watchlist", async (
     MovieNestDbContext db,
     WatchlistMovieService watchlistMovies) =>
 {
-    if (string.IsNullOrWhiteSpace(request.Title))
-    {
-        return Results.BadRequest(new { message = "Title is required." });
-    }
-
     var dbUser = await currentUser.GetUserAsync(user);
     if (dbUser is null)
     {
-        return Results.Unauthorized();
+        ApiErrors.Unauthorized();
     }
 
     var movie = await watchlistMovies.GetOrCreateMovieAsync(request);
@@ -235,7 +236,7 @@ app.MapPost("/api/watchlist", async (
 
     if (alreadyOnList)
     {
-        return Results.Conflict(new { message = "This movie is already on your watchlist." });
+        ApiErrors.Conflict("This movie is already on your watchlist.");
     }
 
     var userMovie = new UserMovie
@@ -256,7 +257,8 @@ app.MapPost("/api/watchlist", async (
 
     return Results.Created($"/api/watchlist/{userMovie.Id}", WatchlistMapper.ToItem(userMovie));
 })
-.RequireAuthorization();
+.RequireAuthorization()
+.WithValidation();
 
 app.MapDelete("/api/watchlist/{id:int}", async (
     int id,
@@ -267,19 +269,21 @@ app.MapDelete("/api/watchlist/{id:int}", async (
     var dbUser = await currentUser.GetUserAsync(user);
     if (dbUser is null)
     {
-        return Results.Unauthorized();
+        ApiErrors.Unauthorized();
     }
 
     var userMovie = await db.UserMovies.FirstOrDefaultAsync(um => um.Id == id);
 
     if (userMovie is null)
     {
-        return Results.NotFound();
+        ApiErrors.NotFound();
     }
+
+    ArgumentNullException.ThrowIfNull(userMovie);
 
     if (userMovie.UserId != dbUser.Id)
     {
-        return Results.StatusCode(StatusCodes.Status403Forbidden);
+        ApiErrors.Forbidden();
     }
 
     db.UserMovies.Remove(userMovie);
@@ -296,15 +300,10 @@ app.MapPatch("/api/watchlist/{id:int}", async (
     CurrentUserService currentUser,
     MovieNestDbContext db) =>
 {
-    if (request.Status != "watched")
-    {
-        return Results.BadRequest(new { message = "Only status 'watched' is supported." });
-    }
-
     var dbUser = await currentUser.GetUserAsync(user);
     if (dbUser is null)
     {
-        return Results.Unauthorized();
+        ApiErrors.Unauthorized();
     }
 
     var userMovie = await db.UserMovies
@@ -315,17 +314,19 @@ app.MapPatch("/api/watchlist/{id:int}", async (
 
     if (userMovie is null)
     {
-        return Results.NotFound();
+        ApiErrors.NotFound();
     }
+
+    ArgumentNullException.ThrowIfNull(userMovie);
 
     if (userMovie.UserId != dbUser.Id)
     {
-        return Results.StatusCode(StatusCodes.Status403Forbidden);
+        ApiErrors.Forbidden();
     }
 
     if (userMovie.Status != "watchlist")
     {
-        return Results.NotFound();
+        ApiErrors.NotFound();
     }
 
     userMovie.Status = "watched";
@@ -333,31 +334,28 @@ app.MapPatch("/api/watchlist/{id:int}", async (
 
     return Results.Ok(WatchlistMapper.ToItem(userMovie));
 })
-.RequireAuthorization();
+.RequireAuthorization()
+.WithValidation();
 
-app.MapGet("/api/movies/search", async (string? q, TmdbService tmdb) =>
+app.MapGet("/api/movies/search", async (
+    [AsParameters] SearchMoviesQuery query,
+    TmdbService tmdb) =>
 {
-    if (string.IsNullOrWhiteSpace(q))
-    {
-        return Results.BadRequest(new { message = "Query parameter q is required." });
-    }
-
-    var results = await tmdb.SearchMoviesAsync(q.Trim());
+    var results = await tmdb.SearchMoviesAsync(query.Q!.Trim());
     return Results.Ok(results);
 })
-.RequireAuthorization();
+.RequireAuthorization()
+.WithValidation();
 
-app.MapGet("/api/movies/{tmdbId:int}/genres", async (int tmdbId, TmdbService tmdb) =>
+app.MapGet("/api/movies/{tmdbId:int}/genres", async (
+    [AsParameters] TmdbMovieGenresRoute route,
+    TmdbService tmdb) =>
 {
-    if (tmdbId <= 0)
-    {
-        return Results.BadRequest(new { message = "Invalid TMDB id." });
-    }
-
-    var genres = await tmdb.GetMovieGenresAsync(tmdbId);
+    var genres = await tmdb.GetMovieGenresAsync(route.TmdbId);
     return Results.Ok(genres);
 })
-.RequireAuthorization();
+.RequireAuthorization()
+.WithValidation();
 
 app.MapGet("/api/reviews", async (
     ClaimsPrincipal user,
@@ -367,7 +365,7 @@ app.MapGet("/api/reviews", async (
     var dbUser = await currentUser.GetUserAsync(user);
     if (dbUser is null)
     {
-        return Results.Unauthorized();
+        ApiErrors.Unauthorized();
     }
 
     var reviews = await db.Reviews
@@ -389,20 +387,10 @@ app.MapPost("/api/reviews", async (
     MovieNestDbContext db,
     WatchlistMovieService watchlistMovies) =>
 {
-    if (string.IsNullOrWhiteSpace(request.Title))
-    {
-        return Results.BadRequest(new { message = "Title is required." });
-    }
-
-    if (request.Rating is < 1 or > 5)
-    {
-        return Results.BadRequest(new { message = "Rating must be between 1 and 5." });
-    }
-
     var dbUser = await currentUser.GetUserAsync(user);
     if (dbUser is null)
     {
-        return Results.Unauthorized();
+        ApiErrors.Unauthorized();
     }
 
     var movie = await watchlistMovies.GetOrCreateMovieAsync(
@@ -413,7 +401,7 @@ app.MapPost("/api/reviews", async (
 
     if (alreadyReviewed)
     {
-        return Results.Conflict(new { message = "You have already reviewed this movie." });
+        ApiErrors.Conflict("You have already reviewed this movie.");
     }
 
     var now = DateTime.UtcNow;
@@ -434,7 +422,8 @@ app.MapPost("/api/reviews", async (
 
     return Results.Created($"/api/reviews/{review.Id}", ReviewMapper.ToResponse(review));
 })
-.RequireAuthorization();
+.RequireAuthorization()
+.WithValidation();
 
 app.MapPatch("/api/reviews/{id:int}", async (
     int id,
@@ -443,15 +432,10 @@ app.MapPatch("/api/reviews/{id:int}", async (
     CurrentUserService currentUser,
     MovieNestDbContext db) =>
 {
-    if (request.Rating is < 1 or > 5)
-    {
-        return Results.BadRequest(new { message = "Rating must be between 1 and 5." });
-    }
-
     var dbUser = await currentUser.GetUserAsync(user);
     if (dbUser is null)
     {
-        return Results.Unauthorized();
+        ApiErrors.Unauthorized();
     }
 
     var review = await db.Reviews
@@ -462,12 +446,14 @@ app.MapPatch("/api/reviews/{id:int}", async (
 
     if (review is null)
     {
-        return Results.NotFound();
+        ApiErrors.NotFound();
     }
+
+    ArgumentNullException.ThrowIfNull(review);
 
     if (review.UserId != dbUser.Id)
     {
-        return Results.StatusCode(StatusCodes.Status403Forbidden);
+        ApiErrors.Forbidden();
     }
 
     review.Rating = request.Rating;
@@ -477,7 +463,8 @@ app.MapPatch("/api/reviews/{id:int}", async (
 
     return Results.Ok(ReviewMapper.ToResponse(review));
 })
-.RequireAuthorization();
+.RequireAuthorization()
+.WithValidation();
 
 app.MapDelete("/api/reviews/{id:int}", async (
     int id,
@@ -488,19 +475,21 @@ app.MapDelete("/api/reviews/{id:int}", async (
     var dbUser = await currentUser.GetUserAsync(user);
     if (dbUser is null)
     {
-        return Results.Unauthorized();
+        ApiErrors.Unauthorized();
     }
 
     var review = await db.Reviews.FirstOrDefaultAsync(r => r.Id == id);
 
     if (review is null)
     {
-        return Results.NotFound();
+        ApiErrors.NotFound();
     }
+
+    ArgumentNullException.ThrowIfNull(review);
 
     if (review.UserId != dbUser.Id)
     {
-        return Results.StatusCode(StatusCodes.Status403Forbidden);
+        ApiErrors.Forbidden();
     }
 
     db.Reviews.Remove(review);
