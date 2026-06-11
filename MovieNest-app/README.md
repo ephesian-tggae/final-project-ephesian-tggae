@@ -194,17 +194,77 @@ Reseed typically takes a few seconds on a laptop.
 - **Watchlist, history, ratings, and reviews:** user-owned data stored in the MovieNest database
 - **Poster image URLs:** served from `image.tmdb.org`
 
-## Advanced integration (Option C)
+## Recommendations (Option C)
 
-MovieNest uses **Option C — instructor-approved alternative**: a **personalized recommendation engine** (not SignalR and not MCP).
+MovieNest implements **Option C — instructor-approved alternative**: a **personalized recommendation engine** (not SignalR and not MCP). The original proposal also mentioned a **SignalR live activity feed** (Option A); that remains **deferred/out of scope** unless added later.
 
-Planned behavior:
+### What it does
 
-- Signed-in users receive movie suggestions based on their watchlist, watched history, reviews, genre tastes, and patterns from community/seed data.
-- Each suggestion includes a **score** and a **reason** (for example, genre affinity or highly rated by similar members).
-- API: `GET /api/recommendations` (protected; in progress).
+Signed-in users see up to **10 movie suggestions** on the home dashboard under **Recommended for you**. Suggestions are **computed on demand** when the app calls the API — they are not written to the database on each request. Movies already on your watchlist, watched history, or review list are excluded.
 
-The original project proposal also mentioned a **SignalR live activity feed** (Option A). That is **deferred/out of scope** for the current milestone unless we add it later.
+The engine ranks candidates using:
+
+- **Your genre tastes** — built from genres on movies in your watchlist (lighter weight), watched history (stronger weight), and reviews (strongest when rated 4+ stars).
+- **Similar members** — other users whose genre activity overlaps with yours; their highly rated or shelved movies can become candidates.
+- **Community signals** — watch activity from seeded fake users and high ratings from other members’ reviews.
+
+The UI shows each suggestion’s **title, release year, poster, and genres**. Results refresh when you navigate back to Home after changing your shelf or reviews.
+
+### Data used
+
+| Source | Role |
+|--------|------|
+| **Watchlist** (`UserMovies`, status `watchlist`) | Genre weights; excluded from results |
+| **Watched history** (`UserMovies`, status `watched`) | Stronger genre weights; excluded from results |
+| **Reviews / ratings** | Extra genre weight (higher for 4–5 stars); reviewed movies excluded |
+| **Movie genres** (`MovieGenre` / TMDB) | Drives personal affinity and candidate discovery |
+| **Seeded community data** | Fake users’ shelf rows and community review stats for cold-start and “popular with similar taste” behavior |
+
+Run [`dotnet run -- seed`](#seed-test-data) so the community layer has enough movies and interactions to suggest from.
+
+### API
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/api/recommendations` | Required (cookie) | Returns a JSON array of up to 10 recommendations for the signed-in user |
+
+**Example response shape** (each item):
+
+```json
+{
+  "movieId": 42,
+  "title": "Example Film",
+  "releaseYear": 2010,
+  "posterUrl": "https://image.tmdb.org/t/p/w500/...",
+  "genres": [{ "id": 1, "name": "Drama" }]
+}
+```
+
+Unauthorized requests return **401**. Try it in Swagger (`http://localhost:5102/swagger`) or with curl after copying your session cookie from the browser:
+
+```bash
+curl -s -H 'Cookie: .AspNetCore.Cookies=YOUR_COOKIE' \
+  http://localhost:5102/api/recommendations
+```
+
+### Demo locally
+
+With the [API and frontend running](#run-locally):
+
+1. **Sign in** with Google (`Log in with Google` on the home page).
+2. **Add movies** to your **Watchlist** or mark them **watched** (Discover, Search, or Watchlist). TMDB-backed titles include genres, which improves personalization.
+3. **Add reviews/ratings** on the **Reviews** page (4–5 star ratings weigh genres more heavily).
+4. Optional: from `backend/`, run `dotnet run -- seed` for community data if suggestions feel sparse.
+5. Go to the **signed-in home dashboard** (Home / `/`).
+6. Scroll to **Recommended for you** — you should see personalized picks. Navigate to Watchlist or History, make a change, then return to Home to see updated suggestions.
+
+### Known limitations (recommendations)
+
+- Movies **without genre data** (for example, some manually typed titles) contribute less to personalization; TMDB-enriched movies work best.
+- **Seed movies** may have fewer genres than real TMDB imports.
+- Suggestions are **not persisted** per request; each API call recomputes results.
+- There is **no movie detail page** from a recommendation card yet — titles are display-only.
+- **Automated tests** for the recommendation engine are not yet in the test suite.
 
 ## Deployment (planned)
 
@@ -216,6 +276,6 @@ Deployed URL and CI badge will be added when Milestone 4 deployment is complete.
 ## Known limitations
 
 - No movie detail page yet.
-- Recommendation engine (Option C) is planned but not fully implemented yet.
 - Manual watchlist form still accepts typed titles (TMDB enrichment runs on the backend).
 - Seed data is in the database for scale; the UI only shows the signed-in user’s own watchlist.
+- Recommendation-specific limits are listed under [Known limitations (recommendations)](#known-limitations-recommendations).

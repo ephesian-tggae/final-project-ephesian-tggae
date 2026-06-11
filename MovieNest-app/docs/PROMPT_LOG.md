@@ -430,38 +430,80 @@ error shape, exception middleware, and a validation endpoint filter.
 **Tested:**Tested by sending invalid request data and checking that the API returned a clear validation error. Also tested
 not fround and unathorized cases to confirm the API returned a consistent error response shape.
 
-## Prompt :
+## Prompt 21: Recommendation database model
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** To start the recommendation engine on the backend
 
-## Prompt :
+**Prompt:** "I want to start the recommendation engine for MovieNest but only on the backend for now. Have a recommendation entity
+that connects user to a movie recommendation. Each one should store the user it belongs to, the movie being recommended,
+a score for how strong the recommendation is, a short reason why the movie is recommended, and the date it was created.
+
+Make sure a user can't have the same movie recommened more than once. Add this entity to the database context and set
+up the relationships with User and Movie. Also create the EF Core migration for this change and make sure the backend
+still builds. When done tell me what the recommendation entity stores, what migration was added, how I can run the migration,
+and how I can test that the backend still builds"
+
+**Result:** Added a Recommendation entity and connected it to the existing User and Movie models, it also updated the database
+context and created an EF Core migration for the new recommendations table.
+
+**Accepted:** I kept the recommendation model because it creates the database foundation needed for the recommendation
+engine without making the feature too large at ounce.
+
+**Changes I made:** none
+**Rejected:** none
+**Tested:** Tested by running the EF Core migration command and checking that the backend still built right.
+
+## Prompt 22: Recommendation service
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** To add the service logic for generating personalized movie recommendations
 
-## Prompt :
+**Prompt:** "Now work on adding the RecommendationService that can generate personalized movie recommendations for a
+signed in user. I feel like the recommendations should use data that the app already has like user's watchlist, the user's
+watched movies, movie genres, user's reviews and rating, and community data from the seeded users and reviews/ratings
+
+Return the top 10 recommended movies with each including a score and a short reason as to why the movie was
+recommended. Keep the code simple and follow the patterns already used in the backend
+
+When done tell me how the recommendation score is calculated, what data the service uses, how movies are excluded if
+the user already has them, and how I can test that the backend still builds"
+
+**Result:** Added a backend ReccommendationService that can generate personalized movie recommendations using existing
+MovieNest data
+
+**Accepted:** Kept it because it added the main backend logic needed for the recommendation engine
+**Changes I made:** none
+**Rejected:** none
+**Tested:** Tested by making sure the backend built successfully. Also reviewed the service logic to see that it returns
+top recommendations, gives each ine a score and reason, and more
+
+## Prompt 23: Recommendations UI
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** To connect the recommendation feature to the frontend
+**Prompt:** "I want to add the personalized recommendations UI to the frontend of the app. The recommendations section should
+show the movie poster, title, release year, genres, recommendation score, and reason why the movie was recommended. Use the
+MovieNest dark theme and reuse the existing card/list styles where possible. Make sure the page handles loading state, error state,
+empty state when there are no recommendations, and 401 case if ther user is not signed in.
+
+Make sure the code is simple and when finished tell me what API function was added, what component was added, and how
+the empty, laoding, and error states work"
+
+**Result:** Added the API funciton to get recommendations, create reusable recommendation list component, and display
+a "Recommended for you" section on the signed in dashboard.
+
+**Accepted:** Kept most of the recommendations section because it connects the backend feature to the user interface
+and makesthe signed in dashboard more useful.
+**Changes I made:** none
+
+**Rejected:** I got rid of the recommended score because I felt like it was not a useful tool and can be hard to be
+accurate in scoring. Also got rid of the reason why it was recommeneded because I felt like regardless what it said
+you would read the summary of the movie to feel if you'd like it or not so I felt it was useless.
+
+**Tested:** Tested by signing in, going to the homepage, and checking that the "Recommended for you" section appeared. I
+also checked that recommendations showed the poster, title, year, genres, and that loading, error, empty, and signed out
+cases were handles correctly.
 
 ## Prompt :
 
