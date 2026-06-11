@@ -17,6 +17,8 @@ public class MovieNestDbContext : DbContext
 
     public DbSet<Review> Reviews => Set<Review>();
 
+    public DbSet<Recommendation> Recommendations => Set<Recommendation>();
+
     public DbSet<Genre> Genres => Set<Genre>();
 
     public DbSet<MovieGenre> MovieGenres => Set<MovieGenre>();
@@ -55,6 +57,20 @@ public class MovieNestDbContext : DbContext
             .HasForeignKey(r => r.UserId);
 
         modelBuilder.Entity<Review>()
+            .HasOne(r => r.Movie)
+            .WithMany()
+            .HasForeignKey(r => r.MovieId);
+
+        modelBuilder.Entity<Recommendation>()
+            .HasIndex(r => new { r.UserId, r.MovieId })
+            .IsUnique();
+
+        modelBuilder.Entity<Recommendation>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId);
+
+        modelBuilder.Entity<Recommendation>()
             .HasOne(r => r.Movie)
             .WithMany()
             .HasForeignKey(r => r.MovieId);
