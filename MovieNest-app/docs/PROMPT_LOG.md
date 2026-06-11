@@ -505,16 +505,26 @@ you would read the summary of the movie to feel if you'd like it or not so I fel
 also checked that recommendations showed the poster, title, year, genres, and that loading, error, empty, and signed out
 cases were handles correctly.
 
-## Prompt :
+## Prompt 24: Scale seed data
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** To scale up the seed data
+
+**Prompt:** "I want to scale up the MovieNest seed data. First only focus on updating the seed data creation. I want you
+to update the existing DatabaseSeeder so it can create at least 5,000 movies, 500 simulated users, and 10,000 user owned
+interation records. These simulated users should stay separate from real Google users. Make sure the seed data feel more
+realistic. I want to make sure the larger seed does not run too slowly. When done I want to see how te seed data
+was made more realistic and how to run the seed command"
+
+**Result:** The seeder now creates more movies, simulated users, and user owned interaction records for testing the
+app at a larger scale.
+
+**Accepted:** I kept the larger seed counts because it made the app feel more realistic
+**Changes I made:** Stopped using made up poster paths with seed movies and instead used TMDB links because after
+scaling the seed data the recommended movies poster stopped working.
+**Rejected:** none
+**Tested:**Tested by running thee seed command and checking that the app created the larger set of movies, simulated
+users, and interaction records. Also checked that dotnet build passed.
 
 ## Prompt :
 
