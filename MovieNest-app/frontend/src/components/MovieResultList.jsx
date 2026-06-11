@@ -33,7 +33,9 @@ export default function MovieResultList({
                   className="search-poster"
                 />
               ) : (
-                <div className="search-poster search-poster--empty">No poster</div>
+                <div className="search-poster search-poster--empty" aria-hidden="true">
+                  No poster
+                </div>
               )}
               <div className="search-result-details">
                 <strong>{movie.title}</strong>
@@ -49,6 +51,13 @@ export default function MovieResultList({
                         type="button"
                         onClick={() => onAddToWatchlist?.(movie)}
                         disabled={isAdded || isAdding}
+                        aria-label={
+                          isAdded
+                            ? `${movie.title} is already on your watchlist`
+                            : isAdding
+                              ? `Adding ${movie.title} to watchlist`
+                              : `Add ${movie.title} to watchlist`
+                        }
                       >
                         {isAdding
                           ? 'Adding…'
@@ -57,7 +66,11 @@ export default function MovieResultList({
                             : 'Add to watchlist'}
                       </button>
                     ) : (
-                      <button type="button" onClick={onSignInToSave}>
+                      <button
+                        type="button"
+                        onClick={onSignInToSave}
+                        aria-label={`Sign in to save ${movie.title} to your watchlist`}
+                      >
                         Sign in to save
                       </button>
                     )}

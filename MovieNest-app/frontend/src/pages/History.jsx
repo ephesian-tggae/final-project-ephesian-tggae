@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchHistory } from '../api';
 import ShelfMovieList from '../components/ShelfMovieList';
+import StatusMessage from '../components/StatusMessage';
 import TmdbAttribution from '../components/TmdbAttribution';
 import UserDataNote from '../components/UserDataNote';
 
@@ -31,8 +32,10 @@ export default function History() {
       <UserDataNote context="history" />
       <TmdbAttribution />
 
-      {loading && <p>Loading your watched movies…</p>}
-      {error && <p className="error">{error}</p>}
+      {loading && (
+        <StatusMessage type="status" message="Loading your watched movies…" />
+      )}
+      {error && <StatusMessage type="error" message={error} />}
 
       {!loading && items.length > 0 && (
         <ShelfMovieList items={items} dateLabel="watched" />

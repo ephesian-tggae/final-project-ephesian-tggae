@@ -5,6 +5,7 @@ import { useAuth } from '../AuthContext';
 import { aggregateGenreCounts, computeAverageRating } from '../utils/dashboardStats';
 import DashboardStatCards from './DashboardStatCards';
 import GenreBarChart from './GenreBarChart';
+import StatusMessage from './StatusMessage';
 
 export default function UserDashboard() {
   const { user } = useAuth();
@@ -70,14 +71,17 @@ export default function UserDashboard() {
     && reviews.length === 0;
 
   return (
-    <section className="user-dashboard landing-stats">
-      <h2>Your MovieNest</h2>
+    <section
+      className="user-dashboard landing-stats"
+      aria-labelledby="user-dashboard-heading"
+    >
+      <h2 id="user-dashboard-heading">Your MovieNest</h2>
       <p className="subtitle">
         Your watchlist, watched history, and reviews — saved to your account.
       </p>
 
-      {loading && <p>Loading your dashboard…</p>}
-      {error && <p className="error">{error}</p>}
+      <StatusMessage type="status" message={loading ? 'Loading your dashboard…' : null} />
+      <StatusMessage type="error" message={!loading ? error : null} />
 
       {!loading && !error && (
         <>

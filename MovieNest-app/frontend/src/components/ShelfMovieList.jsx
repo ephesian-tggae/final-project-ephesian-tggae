@@ -19,7 +19,9 @@ export default function ShelfMovieList({ items, renderActions, dateLabel = 'adde
               className="search-poster"
             />
           ) : (
-            <div className="search-poster search-poster--empty">No poster</div>
+            <div className="search-poster search-poster--empty" aria-hidden="true">
+              No poster
+            </div>
           )}
           <div className="watchlist-item-details">
             <strong>{item.title}</strong>

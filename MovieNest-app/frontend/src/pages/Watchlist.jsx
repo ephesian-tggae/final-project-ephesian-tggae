@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { addToWatchlist, fetchWatchlist, markAsWatched, removeFromWatchlist } from '../api';
 import MovieEntryForm from '../components/MovieEntryForm';
 import ShelfMovieList from '../components/ShelfMovieList';
+import StatusMessage from '../components/StatusMessage';
 import TmdbAttribution from '../components/TmdbAttribution';
 import UserDataNote from '../components/UserDataNote';
 import { validateWatchlistEntry } from '../utils/validateMovieEntry';
@@ -146,8 +147,10 @@ export default function Watchlist() {
         Reload from database
       </button>
 
-      {loading && <p>Loading your watchlist from the backend…</p>}
-      {error && <p className="error">{error}</p>}
+      {loading && (
+        <StatusMessage type="status" message="Loading your watchlist from the backend…" />
+      )}
+      {error && <StatusMessage type="error" message={error} />}
 
       {!loading && items.length > 0 && (
         <ShelfMovieList

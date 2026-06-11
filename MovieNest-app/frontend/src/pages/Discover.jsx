@@ -4,6 +4,7 @@ import { fetchPopularMovies, searchPublicMovies, startLogin } from '../api';
 import { useAuth } from '../AuthContext';
 import MovieResultList from '../components/MovieResultList';
 import SearchForm from '../components/SearchForm';
+import StatusMessage from '../components/StatusMessage';
 import TmdbAttribution from '../components/TmdbAttribution';
 import { useWatchlistFromResults } from '../hooks/useWatchlistFromResults';
 
@@ -92,10 +93,10 @@ export default function Discover() {
         inputLabel="Search movies"
       />
 
-      {error && <p className="error">{error}</p>}
-      {watchlistError && <p className="error">{watchlistError}</p>}
-      {successMessage && <p className="success">{successMessage}</p>}
-      {loading && <p>Loading movies…</p>}
+      <StatusMessage type="error" message={error} />
+      <StatusMessage type="error" message={watchlistError} />
+      <StatusMessage type="success" message={successMessage} />
+      <StatusMessage type="status" message={loading ? 'Loading movies…' : null} />
 
       {!loading && mode === 'search' && movies.length === 0 && !error && (
         <p>No movies found for &ldquo;{query.trim()}&rdquo;.</p>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { searchMovies } from '../api';
 import MovieResultList from '../components/MovieResultList';
 import SearchForm from '../components/SearchForm';
+import StatusMessage from '../components/StatusMessage';
 import TmdbAttribution from '../components/TmdbAttribution';
 import { useWatchlistFromResults } from '../hooks/useWatchlistFromResults';
 
@@ -65,9 +66,10 @@ export default function Search() {
         loading={loading}
       />
 
-      {error && <p className="error">{error}</p>}
-      {watchlistError && <p className="error">{watchlistError}</p>}
-      {successMessage && <p className="success">{successMessage}</p>}
+      <StatusMessage type="error" message={error} />
+      <StatusMessage type="error" message={watchlistError} />
+      <StatusMessage type="success" message={successMessage} />
+      <StatusMessage type="status" message={loading ? 'Searching movies…' : null} />
 
       {!loading && searched && results.length === 0 && !error && query.trim() && (
         <p>No movies found for &ldquo;{query.trim()}&rdquo;.</p>

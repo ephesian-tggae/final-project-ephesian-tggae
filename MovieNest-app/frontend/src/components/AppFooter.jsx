@@ -2,7 +2,7 @@ import TmdbAttribution from './TmdbAttribution';
 
 export default function AppFooter() {
   return (
-    <footer className="app-footer">
+    <footer className="app-footer" aria-label="Site footer">
       <TmdbAttribution variant="footer" />
       <p className="tmdb-legal">
         This product uses the{' '}

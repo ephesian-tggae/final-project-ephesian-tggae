@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchMe } from '../api';
+import StatusMessage from '../components/StatusMessage';
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);
@@ -25,9 +26,11 @@ export default function Profile() {
       <h1>Profile</h1>
       <p className="subtitle">Data from protected endpoint <code>GET /api/me</code>:</p>
 
-      {loading && <p>Loading profile from backend…</p>}
+      {loading && (
+        <StatusMessage type="status" message="Loading profile from backend…" />
+      )}
 
-      {error && <p className="error">{error}</p>}
+      {error && <StatusMessage type="error" message={error} />}
 
       {profile && (
         <pre className="health-data">{JSON.stringify(profile, null, 2)}</pre>

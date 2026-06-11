@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { fetchPublicStats, startLogin } from '../api';
 import { useAuth } from '../AuthContext';
 import UserDashboard from '../components/UserDashboard';
+import StatusMessage from '../components/StatusMessage';
 
 export default function Home() {
   const { user, error, logout } = useAuth();
@@ -30,10 +31,10 @@ export default function Home() {
         </p>
       </header>
 
-      {error && <p className="error">Error: {error}</p>}
+      <StatusMessage type="error" message={error ? `Error: ${error}` : null} />
 
-      <section className="landing-features">
-        <h2>What you can do</h2>
+      <section className="landing-features" aria-labelledby="features-heading">
+        <h2 id="features-heading">What you can do</h2>
         <ul>
           <li>Discover movies and see what is popular right now</li>
           <li>Build a personal watchlist and mark films as watched</li>
@@ -41,9 +42,12 @@ export default function Home() {
         </ul>
       </section>
 
-      <section className="landing-stats">
-        <h2>Community at a glance</h2>
-        {statsLoading && <p>Loading community stats…</p>}
+      <section className="landing-stats" aria-labelledby="community-stats-heading">
+        <h2 id="community-stats-heading">Community at a glance</h2>
+        <StatusMessage
+          type="status"
+          message={statsLoading ? 'Loading community stats…' : null}
+        />
         {stats && (
           <>
             <div className="stats-grid">
@@ -63,7 +67,10 @@ export default function Home() {
             <p className="stats-note">Totals only — no personal data shown here.</p>
           </>
         )}
-        {statsError && <p className="error">Could not load stats: {statsError}</p>}
+        <StatusMessage
+          type="error"
+          message={statsError ? `Could not load stats: ${statsError}` : null}
+        />
       </section>
 
       <UserDashboard />
@@ -77,7 +84,7 @@ export default function Home() {
           <button type="button" onClick={logout}>
             Log out
           </button>
-          <nav className="nav">
+          <nav className="nav" aria-label="Main navigation">
             <Link to="/discover">Discover</Link>
             <Link to="/watchlist">Watchlist</Link>
             <Link to="/history">History</Link>

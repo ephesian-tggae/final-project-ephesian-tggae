@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createReview, deleteReview, fetchReviews, updateReview } from '../api';
 import GenreTags from '../components/GenreTags';
+import FormField from '../components/FormField';
 import MovieEntryForm from '../components/MovieEntryForm';
+import StatusMessage from '../components/StatusMessage';
 import TmdbAttribution from '../components/TmdbAttribution';
 import TmdbImageCredit from '../components/TmdbImageCredit';
 import UserDataNote from '../components/UserDataNote';
@@ -153,8 +155,8 @@ export default function Reviews() {
         submittingLabel="Saving…"
       />
 
-      {loading && <p>Loading your reviews…</p>}
-      {error && <p className="error">{error}</p>}
+      {loading && <StatusMessage type="status" message="Loading your reviews…" />}
+      {error && <StatusMessage type="error" message={error} />}
 
       {!loading && items.length > 0 && (
         <>
@@ -169,7 +171,9 @@ export default function Reviews() {
                   className="search-poster"
                 />
               ) : (
-                <div className="search-poster search-poster--empty">No poster</div>
+                <div className="search-poster search-poster--empty" aria-hidden="true">
+                  No poster
+                </div>
               )}
               <div className="watchlist-item-details">
                 <strong>{item.title}</strong>
@@ -178,8 +182,7 @@ export default function Reviews() {
                 <span className="meta">Your rating: {item.rating} / 5</span>
                 {editingId === item.id ? (
                   <div className="review-edit">
-                    <label>
-                      Rating
+                    <FormField label="Rating" htmlFor={`review-edit-rating-${item.id}`}>
                       <select
                         value={editRating}
                         onChange={(e) => setEditRating(e.target.value)}
@@ -190,15 +193,14 @@ export default function Reviews() {
                         <option value="4">4</option>
                         <option value="5">5</option>
                       </select>
-                    </label>
-                    <label>
-                      Review
+                    </FormField>
+                    <FormField label="Review" htmlFor={`review-edit-text-${item.id}`}>
                       <textarea
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
                         rows={3}
                       />
-                    </label>
+                    </FormField>
                     <button
                       type="button"
                       onClick={() => handleUpdate(item.id)}
