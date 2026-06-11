@@ -341,38 +341,74 @@ function the way I wanted them too
 **Rejected:**none
 **Tested:** Tested by going through pages like watchlist to see the genre tags of movies on my list.
 
-## Prompt :
+## Prompt 17: Movies to watchlist
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** For users to be able to save movies to their watchlist directly from the Discover and Search pages.
 
-## Prompt :
+**Prompt:** "I want users to now be able to add movies to their watchlist from the Discover and Search pages. So now
+I want each movie card to have an "Add to watchlist" button when searched through the Discover and Search pages.
+When signed in users clicks it, the movie should be saved to their watchlist with the movie title, year, poster, TMDB
+id, and any other movie details already available. If the user is signed out on the public Discover page, they should
+see a clear option to sign in before saving a movie.
+
+After a movie is added, the button should show that it was added or already on the watchlist. If the movie is already
+saved, show a simple message instead of crashing or showing a confusing error.
+
+Keep the code simple and only change what's needed for this feature. Also update the README accordingly"
+
+**Result:** Connected the TMDB movie cards on Discover and Search to the watchlist feature. Signed in users can now
+add a movie from the movie result card, and the movie appears on the Watchlist page with its saved movie details.
+
+**Accepted:** Kept the add to watchlist buttons because they made the movie results more useful
+**Changes I made:** none
+**Rejected:** none
+**Tested:** Signed in, searched for a movie, clicked the "Add to watchlist" button, and seeing that the movie appeared
+in the Watchlist page. Did the same with the Discover page and also checked when signed out to see the option to sign in.
+
+## Prompt 18: Resuable react forms
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** To add reusable form components and client side validation to improve the React frontend quality
 
-## Prompt :
+**Prompt:** "Please create a simple reusable form componets and use them in places where I already have forms. The forms
+should show clear field level errors before sending anything to the backend. Just one example would be if the movie title
+is empty, then show show an error under the title field. Do a few like that. Keep the design the same with the current
+black MovieNest style. Make the forms accessible with labels, useful error messages, and meaningful poster alt text.
+
+Make sure the code is simple, what reusable components were added, which pages now use the reusable forms and how I can test
+the validation errors"
+
+**Result:** Improved the frontend form structure by adding reusable form components and using them across existing
+pages. Also added clint side validation so users can see error before submitting forms.
+
+**Accepted:** Kept the reusable form components and validation changes because it made the app easier to use
+**Changes I made:** none
+**Rejected:** none
+**Tested:** Tested by submitting empty or invalid values across the pages to see the error messages appear.
+
+## Prompt 19: Dashboard to home page
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** To have a dashboard at the home page for signed in user to show useful user data like reviews, genres, and more
+
+**Prompt:** "I want a dashboard section for signed in users atthe homepage of MovieNest. I expect signed in user's home
+page to show a "Your MovieNest" section that uses the user's real data from the app. The dashboard should show simple
+stats like how many movies watched, a simple genre chart, and a recent watchlist table that the user can filter and sort
+
+Make the dashbaord look like the rest of the dark MovieNest design. Also make sure it has loading, empty, and error
+messages. Keep the code simple and the table should be easy to use and work on smaller screens"
+
+**Result:** Having a dashboard section showing the user stats, genre chart and a recent watchlist table using existing
+user data from the app.
+
+**Accepted:** I kept almost everything about the dashboard because it helped make the home page more useful
+**Changes I made:** none
+**Rejected:** I got rid of the watchlist table because I realized that the more you add to your watchlist the long the table
+will be and I decided not to fix that problem because we have a watchlist page so why do i need a table for it in
+the home page.
+**Tested:** I tested by checking the dashboard in the home page signed in. Checked on by clicking the button leading to the
+other pages.
 
 ## Prompt :
 

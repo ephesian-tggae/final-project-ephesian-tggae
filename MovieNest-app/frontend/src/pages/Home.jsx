@@ -2,16 +2,19 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchPublicStats, startLogin } from '../api';
 import { useAuth } from '../AuthContext';
+import UserDashboard from '../components/UserDashboard';
 
 export default function Home() {
   const { user, error, logout } = useAuth();
   const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [statsError, setStatsError] = useState(null);
 
   useEffect(() => {
     fetchPublicStats()
       .then(setStats)
-      .catch((err) => setStatsError(err.message));
+      .catch((err) => setStatsError(err.message))
+      .finally(() => setStatsLoading(false));
   }, []);
 
   return (
@@ -38,28 +41,32 @@ export default function Home() {
         </ul>
       </section>
 
-      {stats && (
-        <section className="landing-stats">
-          <h2>Community at a glance</h2>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <strong>{stats.totalMovies.toLocaleString()}</strong>
-              <span>movies tracked</span>
+      <section className="landing-stats">
+        <h2>Community at a glance</h2>
+        {statsLoading && <p>Loading community stats…</p>}
+        {stats && (
+          <>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <strong>{stats.totalMovies.toLocaleString()}</strong>
+                <span>movies tracked</span>
+              </div>
+              <div className="stat-card">
+                <strong>{stats.totalMembers.toLocaleString()}</strong>
+                <span>members</span>
+              </div>
+              <div className="stat-card">
+                <strong>{stats.totalActivity.toLocaleString()}</strong>
+                <span>watchlist &amp; watched entries</span>
+              </div>
             </div>
-            <div className="stat-card">
-              <strong>{stats.totalMembers.toLocaleString()}</strong>
-              <span>members</span>
-            </div>
-            <div className="stat-card">
-              <strong>{stats.totalActivity.toLocaleString()}</strong>
-              <span>watchlist &amp; watched entries</span>
-            </div>
-          </div>
-          <p className="stats-note">Totals only — no personal data shown here.</p>
-        </section>
-      )}
+            <p className="stats-note">Totals only — no personal data shown here.</p>
+          </>
+        )}
+        {statsError && <p className="error">Could not load stats: {statsError}</p>}
+      </section>
 
-      {statsError && <p className="error">Could not load stats: {statsError}</p>}
+      <UserDashboard />
 
       {user ? (
         <section className="auth-box">
