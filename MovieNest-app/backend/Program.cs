@@ -33,6 +33,7 @@ builder.Services.AddScoped<UserSyncService>();
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddScoped<GenreService>();
 builder.Services.AddScoped<WatchlistMovieService>();
+builder.Services.AddScoped<RecommendationService>();
 builder.Services.AddHttpClient<TmdbService>();
 
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
