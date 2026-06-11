@@ -358,6 +358,23 @@ app.MapGet("/api/movies/{tmdbId:int}/genres", async (
 .RequireAuthorization()
 .WithValidation();
 
+// Computed on demand via RecommendationService — not written to the Recommendations table per request.
+app.MapGet("/api/recommendations", async (
+    ClaimsPrincipal user,
+    CurrentUserService currentUser,
+    RecommendationService recommendations) =>
+{
+    var dbUser = await currentUser.GetUserAsync(user);
+    if (dbUser is null)
+    {
+        ApiErrors.Unauthorized();
+    }
+
+    var results = await recommendations.GetForUserAsync(dbUser.Id);
+    return Results.Ok(results);
+})
+.RequireAuthorization();
+
 app.MapGet("/api/reviews", async (
     ClaimsPrincipal user,
     CurrentUserService currentUser,
