@@ -54,31 +54,15 @@ public class RecommendationService
                 .ThenInclude(mg => mg.Genre)
             .ToListAsync(cancellationToken);
 
-        var topGenreNames = userGenreWeights
-            .OrderByDescending(pair => pair.Value)
-            .Take(3)
-            .Select(pair => pair.Key)
-            .ToList();
-
-        var scored = movies
-            .Select(movie =>
-            {
-                var (score, reason) = ScoreMovie(
-                    movie,
-                    userGenreWeights,
-                    topGenreNames,
-                    similarUserIds,
-                    communityStats,
-                    hasPersonalHistory);
-
-                return RecommendationMapper.ToCandidate(movie, score, reason);
-            })
-            .OrderByDescending(candidate => candidate.Score)
-            .ThenBy(candidate => candidate.Title)
+        var ranked = movies
+            .Select(movie => (movie, rank: RankMovie(movie, userGenreWeights, communityStats)))
+            .OrderByDescending(entry => entry.rank)
+            .ThenBy(entry => entry.movie.Title)
             .Take(MaxResults)
+            .Select(entry => RecommendationMapper.ToCandidate(entry.movie))
             .ToList();
 
-        return scored;
+        return ranked;
     }
 
     private async Task<HashSet<int>> GetExcludedMovieIdsAsync(
@@ -346,70 +330,25 @@ public class RecommendationService
         return candidateIds;
     }
 
-    private static (int Score, string Reason) ScoreMovie(
+    private static int RankMovie(
         Movie movie,
         Dictionary<string, double> userGenreWeights,
-        IReadOnlyList<string> topGenreNames,
-        HashSet<int> similarUserIds,
-        Dictionary<int, CommunityMovieStats> communityStats,
-        bool hasPersonalHistory)
+        Dictionary<int, CommunityMovieStats> communityStats)
     {
-        var movieGenres = movie.MovieGenres
-            .Select(mg => mg.Genre.Name)
-            .ToList();
+        var genrePoints = movie.MovieGenres.Sum(
+            mg => userGenreWeights.TryGetValue(mg.Genre.Name, out var weight) ? weight : 0);
 
-        var genrePoints = movieGenres.Sum(
-            genre => userGenreWeights.TryGetValue(genre, out var weight) ? weight : 0);
-
-        var genreScore = (int)Math.Min(55, Math.Round(genrePoints * 8));
+        var genreRank = (int)Math.Min(55, Math.Round(genrePoints * 8));
 
         var community = communityStats.GetValueOrDefault(
             movie.Id,
             new CommunityMovieStats(0, 0, 0));
-        var communityScore = (int)Math.Min(
+        var communityRank = (int)Math.Min(
             45,
             community.WatchCount * 2 + community.HighRatingCount * 5
             + (community.AverageRating >= 4.5 ? 8 : 0));
 
-        var score = Math.Clamp(genreScore + communityScore, 1, 100);
-
-        var matchedGenres = movieGenres
-            .Where(genre => topGenreNames.Contains(genre, StringComparer.OrdinalIgnoreCase))
-            .Take(2)
-            .ToList();
-
-        var reasonParts = new List<string>();
-
-        if (matchedGenres.Count > 0)
-        {
-            reasonParts.Add($"Because you watch a lot of {string.Join(" and ", matchedGenres)}");
-        }
-
-        if (community.WatchCount > 0 || community.HighRatingCount > 0)
-        {
-            if (similarUserIds.Count > 0)
-            {
-                reasonParts.Add("members with similar taste liked this");
-            }
-            else if (community.AverageRating > 0)
-            {
-                reasonParts.Add(
-                    $"highly rated by the community ({community.AverageRating:0.#}/5)");
-            }
-            else
-            {
-                reasonParts.Add("popular in the MovieNest community");
-            }
-        }
-
-        if (reasonParts.Count == 0)
-        {
-            reasonParts.Add(hasPersonalHistory
-                ? "Suggested based on your MovieNest activity"
-                : "Trending in the MovieNest community");
-        }
-
-        return (score, string.Join(" — ", reasonParts));
+        return Math.Clamp(genreRank + communityRank, 1, 100);
     }
 
     private sealed record CommunityMovieStats(

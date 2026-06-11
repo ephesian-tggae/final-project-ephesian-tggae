@@ -1,19 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { fetchHistory, fetchReviews, fetchWatchlist } from '../api';
+import { Link, useLocation } from 'react-router-dom';
+import { fetchHistory, fetchRecommendations, fetchReviews, fetchWatchlist } from '../api';
 import { useAuth } from '../AuthContext';
 import { aggregateGenreCounts, computeAverageRating } from '../utils/dashboardStats';
 import DashboardStatCards from './DashboardStatCards';
 import GenreBarChart from './GenreBarChart';
+import RecommendationList from './RecommendationList';
 import StatusMessage from './StatusMessage';
 
 export default function UserDashboard() {
   const { user } = useAuth();
+  const location = useLocation();
   const [watchlist, setWatchlist] = useState([]);
   const [history, setHistory] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false);
+  const [recommendationsError, setRecommendationsError] = useState(null);
+  const [recommendationsUnauthorized, setRecommendationsUnauthorized] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -47,7 +53,36 @@ export default function UserDashboard() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [user, location.key]);
+
+  useEffect(() => {
+    if (!user) {
+      setRecommendations([]);
+      setRecommendationsError(null);
+      setRecommendationsUnauthorized(false);
+      return;
+    }
+
+    setRecommendationsLoading(true);
+    setRecommendationsError(null);
+    setRecommendationsUnauthorized(false);
+
+    fetchRecommendations()
+      .then((data) => {
+        if (data === null) {
+          setRecommendations([]);
+          setRecommendationsUnauthorized(true);
+          return;
+        }
+
+        setRecommendations(data);
+      })
+      .catch((err) => {
+        setRecommendations([]);
+        setRecommendationsError(err.message);
+      })
+      .finally(() => setRecommendationsLoading(false));
+  }, [user, location.key]);
 
   const genreCounts = useMemo(
     () => aggregateGenreCounts([watchlist, history, reviews]),
@@ -101,6 +136,48 @@ export default function UserDashboard() {
           )}
 
           <GenreBarChart genreCounts={genreCounts} />
+
+          <section
+            className="recommendations-section"
+            aria-labelledby="recommendations-heading"
+          >
+            <h3 id="recommendations-heading">Recommended for you</h3>
+            <p className="subtitle">
+              Personalized picks from your activity and the MovieNest community.
+            </p>
+
+            <StatusMessage
+              type="status"
+              message={recommendationsLoading ? 'Loading recommendations…' : null}
+            />
+            <StatusMessage
+              type="error"
+              message={!recommendationsLoading ? recommendationsError : null}
+            />
+
+            {recommendationsUnauthorized && !recommendationsLoading && (
+              <p className="dashboard-empty">
+                Sign in again to see your recommendations.
+              </p>
+            )}
+
+            {!recommendationsLoading
+              && !recommendationsError
+              && !recommendationsUnauthorized
+              && recommendations.length === 0 && (
+                <p className="dashboard-empty">
+                  No recommendations yet. Add movies on{' '}
+                  <Link to="/discover">Discover</Link> or your{' '}
+                  <Link to="/watchlist">Watchlist</Link> to get started.
+                </p>
+            )}
+
+            {!recommendationsLoading
+              && !recommendationsError
+              && !recommendationsUnauthorized && (
+                <RecommendationList recommendations={recommendations} />
+            )}
+          </section>
         </>
       )}
     </section>

@@ -12,9 +12,5 @@ public class Recommendation
 
     public Movie Movie { get; set; } = null!;
 
-    public int Score { get; set; }
-
-    public string Reason { get; set; } = string.Empty;
-
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

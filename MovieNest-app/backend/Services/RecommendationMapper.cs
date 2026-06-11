@@ -5,13 +5,11 @@ namespace MovieNest.Api.Services;
 
 public static class RecommendationMapper
 {
-    public static RecommendationCandidate ToCandidate(Movie movie, int score, string reason) =>
+    public static RecommendationCandidate ToCandidate(Movie movie) =>
         new(
             movie.Id,
             movie.Title,
             movie.ReleaseYear,
             TmdbService.ToPosterUrl(movie.PosterPath),
-            GenreMapper.ToGenres(movie),
-            score,
-            reason);
+            GenreMapper.ToGenres(movie));
 }

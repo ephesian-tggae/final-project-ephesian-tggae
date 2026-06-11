@@ -209,6 +209,21 @@ export async function fetchReviews() {
   return response.json();
 }
 
+export async function fetchRecommendations() {
+  const response = await fetch(`${apiBaseUrl}/api/recommendations`, withCredentials);
+
+  if (response.status === 401) {
+    return null;
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Backend returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export async function createReview(title, rating, text, releaseYear = null) {
   const response = await fetch(`${apiBaseUrl}/api/reviews`, {
     method: 'POST',

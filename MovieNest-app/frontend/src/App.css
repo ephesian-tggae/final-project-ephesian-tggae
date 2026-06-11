@@ -198,6 +198,16 @@
   color: var(--mn-muted);
 }
 
+.recommendations-section {
+  margin-top: 2rem;
+}
+
+.recommendations-section h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  color: var(--mn-text);
+}
+
 .genre-chart-section {
   margin-top: 2rem;
 }

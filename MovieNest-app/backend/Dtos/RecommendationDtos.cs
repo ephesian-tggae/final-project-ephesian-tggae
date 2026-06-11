@@ -5,6 +5,4 @@ public record RecommendationCandidate(
     string Title,
     int? ReleaseYear,
     string? PosterUrl,
-    IReadOnlyList<GenreResponse> Genres,
-    int Score,
-    string Reason);
+    IReadOnlyList<GenreResponse> Genres);

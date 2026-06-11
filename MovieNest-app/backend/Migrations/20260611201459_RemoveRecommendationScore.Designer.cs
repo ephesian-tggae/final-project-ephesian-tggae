@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MovieNest.Api.Data;
 
@@ -10,9 +11,11 @@ using MovieNest.Api.Data;
 namespace MovieNest.Api.Migrations
 {
     [DbContext(typeof(MovieNestDbContext))]
-    partial class MovieNestDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260611201459_RemoveRecommendationScore")]
+    partial class RemoveRecommendationScore
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.8");
@@ -91,6 +94,10 @@ namespace MovieNest.Api.Migrations
 
                     b.Property<int>("MovieId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
