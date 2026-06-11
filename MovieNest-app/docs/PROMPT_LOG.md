@@ -410,16 +410,25 @@ the home page.
 **Tested:** I tested by checking the dashboard in the home page signed in. Checked on by clicking the button leading to the
 other pages.
 
-## Prompt :
+## Prompt 20: Validation and error handling
 
 **Tool:** Cursor
-**Goal:**
-**Prompt:** "..."
-**Result:**
-**Accepted:**
-**Changes I made:**
-**Rejected:**
-**Tested:**
+**Goal:** Make request validation cleaner, make the API error responses consisten, and to avoid having random exception
+messages returned in different formats.
+
+**Prompt:** "Can I write this to my agent: Can you give me: Request validation using data annotations,
+FluentValidation, or equivalent — not manual if-checks, Consistent error responses — a unified error response
+shape, not random exception messages, and Centralized error handling middleware or exception filter.
+
+Keep the code simple and tell me hot to test"
+
+**Result:** Added data annotation validation and centralized error handling for the MovieNest API. Endpoints now use a unified
+error shape, exception middleware, and a validation endpoint filter.
+**Accepted:** kept the validation and error handling changes because they made the backend more consistent
+**Changes I made:** none
+**Rejected:** none
+**Tested:**Tested by sending invalid request data and checking that the API returned a clear validation error. Also tested
+not fround and unathorized cases to confirm the API returned a consistent error response shape.
 
 ## Prompt :
 

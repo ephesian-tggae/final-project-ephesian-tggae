@@ -194,6 +194,18 @@ Reseed typically takes a few seconds on a laptop.
 - **Watchlist, history, ratings, and reviews:** user-owned data stored in the MovieNest database
 - **Poster image URLs:** served from `image.tmdb.org`
 
+## Advanced integration (Option C)
+
+MovieNest uses **Option C — instructor-approved alternative**: a **personalized recommendation engine** (not SignalR and not MCP).
+
+Planned behavior:
+
+- Signed-in users receive movie suggestions based on their watchlist, watched history, reviews, genre tastes, and patterns from community/seed data.
+- Each suggestion includes a **score** and a **reason** (for example, genre affinity or highly rated by similar members).
+- API: `GET /api/recommendations` (protected; in progress).
+
+The original project proposal also mentioned a **SignalR live activity feed** (Option A). That is **deferred/out of scope** for the current milestone unless we add it later.
+
 ## Deployment (planned)
 
 - **Frontend:** Vercel
@@ -203,6 +215,7 @@ Deployed URL and CI badge will be added when Milestone 4 deployment is complete.
 
 ## Known limitations
 
-- No movie detail page or recommendation engine yet.
+- No movie detail page yet.
+- Recommendation engine (Option C) is planned but not fully implemented yet.
 - Manual watchlist form still accepts typed titles (TMDB enrichment runs on the backend).
 - Seed data is in the database for scale; the UI only shows the signed-in user’s own watchlist.

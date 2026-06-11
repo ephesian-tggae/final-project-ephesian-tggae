@@ -4,7 +4,11 @@ The app is for movie fans who want once place to organize what they've watched, 
 
 The domain I chose was movies/films discovery and tracking.
 
-The third-party API I'm using is TMDB for movie titles, posters, genres, and search. I choosing option C for my advanced integration.
+The third-party API I'm using is TMDB for movie titles, posters, genres, and search.
+
+Advanced integration (rubric Option C): a personalized recommendation engine that suggests movies from the user's watch history, reviews, genres, and community activity (including seeded users). Each recommendation has a score and a human-readable reason.
+
+We are not using SignalR/WebSockets (Option A) or MCP (Option B). A live SignalR community feed was mentioned in the original project proposal but is deferred/out of scope unless added later.
 
 User (real OAuth users + seeded simulated users)
 Movie (TMDB id + metadata)
