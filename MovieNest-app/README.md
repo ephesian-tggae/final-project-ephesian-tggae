@@ -132,29 +132,60 @@ Do not commit secrets, `.env` with real keys, or `movienest.db`.
 
 ## Seed test data
 
-The seed script adds **simulated** data only. It does **not** delete real Google OAuth users or their watchlist rows.
+The seed script populates the database with **simulated community data** so the app feels alive at scale (recommendations, community stats, and future features). It does **not** create real OAuth accounts and does **not** delete real Google users or their data when you reseed.
 
-| Data | Count |
-|------|------:|
-| Movies (domain records) | 500 |
-| Fake users | 50 |
-| Watchlist / watched rows | 1,000 |
+### What the seeder creates
 
-Fake users use ids like `seed:user:001` and emails like `seed-user-001@movienest.local`.
+| Data | Count | Notes |
+|------|------:|-------|
+| Movies (domain records) | **5,000** | Synthetic titles; `TmdbId` from `1_000_001` upward; genres via `MovieGenre` |
+| Simulated users | **500** | Realistic names; `OAuthSubjectId` like `seed:user:0001` |
+| User-owned interactions (total) | **10,000** | See breakdown below |
+
+**Interaction breakdown (10,000 total):**
+
+| Type | Count | Description |
+|------|------:|-------------|
+| `UserMovies` | **8,000** | Mix of `watchlist` and `watched` shelf rows on seed movies |
+| `Reviews` | **2,000** | Ratings (and optional short review text) on seed movies |
+
+The seeder also ensures standard **genre** rows exist and assigns **1–3 genres** per seed movie. Seed movie **posters** use real TMDB `poster_path` values from a bundled JSON file (`backend/Data/seed-poster-paths.json`) — **no TMDB API calls** during `dotnet run -- seed`.
+
+### Simulated vs real external data
+
+| Source | Simulated (seed) | Real (live app) |
+|--------|------------------|-----------------|
+| **Users** | Fake members (`seed:` OAuth ids, `@movienest.local` emails) | Google OAuth sign-in |
+| **Movies** | 5,000 generated catalog entries (`TmdbId >= 1000001`) | TMDB search/discover when you add to your shelf |
+| **Shelf / reviews** | Seed users’ watchlist, watched, and review rows | Your watchlist, history, and reviews after sign-in |
+| **Posters (seed movies)** | Bundled real TMDB paths (static JSON) | TMDB when adding movies via Discover/Search |
+| **Posters (display)** | Served from `image.tmdb.org` | Same CDN |
+
+Real Google users and their shelf/review data are stored in the same database but are **kept separate** from seed users (see below).
+
+### How seed users stay separate from real users
+
+- **Seed users** have `OAuthSubjectId` values starting with `seed:` (for example `seed:user:0042`).
+- **Real users** have Google OAuth subject ids (they do **not** start with `seed:`).
+- Seed movies are identified by **`TmdbId >= 1000001`**. Movies you add from TMDB use real TMDB ids (typically much lower).
+- The recommendation engine treats seed activity as **community** data; your signed-in dashboard only shows **your** shelf and reviews in the UI.
 
 ### Run the seed
 
-From `backend/`:
+From `backend/` (stop the API first if it is running — SQLite allows one writer):
 
 ```bash
+cd backend
 dotnet run -- seed
 ```
 
-First run inserts data. If seed data already exists, the command skips inserts and prints counts.
+- First run (empty seed tables): inserts the full dataset and prints counts.
+- If target counts are already present: **skips insert** (idempotent) and prints counts.
+- If **partial or outdated** seed data exists (for example after changing scale): prints a message — run with `--reset` below.
 
 ### Reset and reseed
 
-Removes **only** seed movies, seed users, and their interactions. Real Google users stay.
+Removes **seed-only** data (seed users, seed movies in the `TmdbId >= 1000001` range, their genres, shelf rows, and reviews), then inserts a fresh dataset. **Real Google OAuth users are not deleted.**
 
 ```bash
 dotnet run -- seed --reset
@@ -162,24 +193,37 @@ dotnet run -- seed --reset
 
 ### Check that seed worked
 
-After `dotnet run -- seed`, the command prints counts, for example:
+After seeding, the command prints counts, for example:
 
 ```text
-  Seed movies:        500 (target 500)
-  Seed users:         50 (target 50)
-  Seed interactions:  1000 (target 1000)
-  Real OAuth users:   1 (unchanged by seed)
+  Seed movies:              5000 (target 5000)
+  Seed users:               500 (target 500)
+  Seed UserMovies:          8000 (target 8000)
+  Seed reviews:             2000 (target 2000)
+  Seed interactions total:  10000 (target 10000)
+  Real OAuth users:         3 (unchanged by seed)
 ```
 
 Optional SQLite checks (from `backend/`):
 
 ```bash
+# Seed movies (TmdbId >= 1000001)
 sqlite3 movienest.db "SELECT COUNT(*) FROM Movies WHERE TmdbId >= 1000001;"
+
+# Simulated users
 sqlite3 movienest.db "SELECT COUNT(*) FROM Users WHERE OAuthSubjectId LIKE 'seed:%';"
+
+# Seed shelf rows (watchlist + watched)
 sqlite3 movienest.db "SELECT COUNT(*) FROM UserMovies um JOIN Users u ON u.Id = um.UserId WHERE u.OAuthSubjectId LIKE 'seed:%';"
+
+# Seed reviews
+sqlite3 movienest.db "SELECT COUNT(*) FROM Reviews r JOIN Users u ON u.Id = r.UserId WHERE u.OAuthSubjectId LIKE 'seed:%';"
+
+# Real Google users (should not change when you seed)
+sqlite3 movienest.db "SELECT COUNT(*) FROM Users WHERE OAuthSubjectId NOT LIKE 'seed:%';"
 ```
 
-Reseed typically takes a few seconds on a laptop.
+**Duration:** A full `dotnet run -- seed --reset` on a laptop takes about **8 seconds** end-to-end (including app startup); the insert step alone is about **3 seconds** after the reset clears old seed rows.
 
 ## Stack
 
@@ -206,7 +250,7 @@ The engine ranks candidates using:
 
 - **Your genre tastes** — built from genres on movies in your watchlist (lighter weight), watched history (stronger weight), and reviews (strongest when rated 4+ stars).
 - **Similar members** — other users whose genre activity overlaps with yours; their highly rated or shelved movies can become candidates.
-- **Community signals** — watch activity from seeded fake users and high ratings from other members’ reviews.
+- **Community signals** — watch activity from **500 seeded simulated users** (8,000 shelf rows + 2,000 reviews) and high ratings from other members’ reviews.
 
 The UI shows each suggestion’s **title, release year, poster, and genres**. Results refresh when you navigate back to Home after changing your shelf or reviews.
 
@@ -218,9 +262,9 @@ The UI shows each suggestion’s **title, release year, poster, and genres**. Re
 | **Watched history** (`UserMovies`, status `watched`) | Stronger genre weights; excluded from results |
 | **Reviews / ratings** | Extra genre weight (higher for 4–5 stars); reviewed movies excluded |
 | **Movie genres** (`MovieGenre` / TMDB) | Drives personal affinity and candidate discovery |
-| **Seeded community data** | Fake users’ shelf rows and community review stats for cold-start and “popular with similar taste” behavior |
+| **Seeded community data** | **5,000** seed movies, **500** fake users, **10,000** interactions (8k shelf + 2k reviews) for cold-start and community ranking |
 
-Run [`dotnet run -- seed`](#seed-test-data) so the community layer has enough movies and interactions to suggest from.
+Run [`dotnet run -- seed --reset`](#reset-and-reseed) from `backend/` so the community layer has the full scaled dataset (5,000 movies, 500 users, 10,000 interactions).
 
 ### API
 
@@ -254,14 +298,14 @@ With the [API and frontend running](#run-locally):
 1. **Sign in** with Google (`Log in with Google` on the home page).
 2. **Add movies** to your **Watchlist** or mark them **watched** (Discover, Search, or Watchlist). TMDB-backed titles include genres, which improves personalization.
 3. **Add reviews/ratings** on the **Reviews** page (4–5 star ratings weigh genres more heavily).
-4. Optional: from `backend/`, run `dotnet run -- seed` for community data if suggestions feel sparse.
+4. From `backend/`, run `dotnet run -- seed --reset` if you have not seeded yet (or want fresh community data).
 5. Go to the **signed-in home dashboard** (Home / `/`).
 6. Scroll to **Recommended for you** — you should see personalized picks. Navigate to Watchlist or History, make a change, then return to Home to see updated suggestions.
 
 ### Known limitations (recommendations)
 
 - Movies **without genre data** (for example, some manually typed titles) contribute less to personalization; TMDB-enriched movies work best.
-- **Seed movies** may have fewer genres than real TMDB imports.
+- **Seed movies** use bundled TMDB poster paths and synthetic titles; they are not the same as movies you add live from Discover/Search.
 - Suggestions are **not persisted** per request; each API call recomputes results.
 - There is **no movie detail page** from a recommendation card yet — titles are display-only.
 - **Automated tests** for the recommendation engine are not yet in the test suite.
