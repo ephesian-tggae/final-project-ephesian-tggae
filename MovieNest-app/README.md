@@ -2,6 +2,17 @@
 
 Community movie platform: track watchlists and watch history, write reviews, and discover films through personalized recommendations.
 
+## Live demo
+
+| | URL |
+|---|-----|
+| **App** | https://final-project-ephesian-tggae.vercel.app |
+| **API health** | https://movie-nest-app.onrender.com/api/health |
+
+- **OAuth:** Google
+- **Third-party API:** TMDB
+- **Advanced integration:** Option C — personalized recommendation engine
+
 ## Repository layout
 
 | Path | Description |
@@ -122,6 +133,20 @@ Health check (no login): `http://localhost:5102/api/health`
 | `ConnectionStrings:DefaultConnection` | `backend/appsettings.Development.json` | SQLite file path (`movienest.db`) |
 | `FrontendUrl` | `backend/appsettings.Development.json` | React URL after OAuth (`http://localhost:5173`) |
 | `Cors:AllowedOrigins` | `backend/appsettings.Development.json` | Allowed frontend origin for cookie auth |
+| `SEED_ON_STARTUP` | Render (optional) | Set to `true` on first deploy to seed community data; set `false` after |
+
+**Production (Render + Vercel)** — set in each host’s dashboard, not in git:
+
+| Variable | Host | Value |
+|----------|------|--------|
+| `VITE_API_URL` | Vercel | `https://movie-nest-app.onrender.com` |
+| `Authentication__Google__ClientId` | Render | Google OAuth client ID |
+| `Authentication__Google__ClientSecret` | Render | Google OAuth client secret |
+| `Tmdb__ApiKey` | Render | TMDB v3 API key |
+| `ConnectionStrings__DefaultConnection` | Render | `Data Source=/var/data/movienest.db` |
+| `FrontendUrl` | Render | `https://final-project-ephesian-tggae.vercel.app` |
+| `Cors__AllowedOrigins__0` | Render | Same as `FrontendUrl` |
+| `SEED_ON_STARTUP` | Render | `true` for first deploy, then `false` |
 
 Do not commit secrets, `.env` with real keys, or `movienest.db`.
 
@@ -227,8 +252,9 @@ sqlite3 movienest.db "SELECT COUNT(*) FROM Users WHERE OAuthSubjectId NOT LIKE '
 
 ## Stack
 
-- **Backend:** ASP.NET Core, EF Core, SQLite (local) / PostgreSQL (production planned)
-- **Frontend:** Vite + React, React Router
+- **Backend:** ASP.NET Core, EF Core, SQLite (local and production on Render)
+- **Frontend:** Vite + React, React Router (hosted on Vercel)
+- **Hosting:** Render (Docker API) + Vercel (SPA)
 - **Auth:** Google OAuth (cookie sessions)
 - **External API:** TMDB (movie search); genres are fetched from TMDB and stored on `Movie` via `MovieGenre`
 
@@ -310,12 +336,44 @@ With the [API and frontend running](#run-locally):
 - There is **no movie detail page** from a recommendation card yet — titles are display-only.
 - **Automated tests** for the recommendation engine are not yet in the test suite.
 
-## Deployment (planned)
+## Deployment (Render + Vercel)
 
-- **Frontend:** Vercel
-- **Backend + database:** Azure App Service + Azure PostgreSQL
+Production uses **Vercel** for the React frontend and **Render** for the .NET API. The API runs in a **Docker** container (see `backend/Dockerfile`) because Render’s native Node runtime does not include the .NET SDK.
 
-Deployed URL and CI badge will be added when Milestone 4 deployment is complete.
+### Frontend (Vercel)
+
+1. Import the GitHub repo at [vercel.com](https://vercel.com).
+2. **Root directory:** `MovieNest-app/frontend`
+3. **Environment variable:** `VITE_API_URL=https://movie-nest-app.onrender.com`
+4. Deploy, then copy the `.vercel.app` URL for Render CORS settings.
+
+Redeploy Vercel after changing `VITE_API_URL` (Vite bakes env vars at build time).
+
+### Backend (Render)
+
+1. Create a **Web Service** with **Language: Docker** (not Node).
+2. **Root directory:** `MovieNest-app/backend`
+3. **Dockerfile path:** `./Dockerfile`
+4. Leave **Build Command** and **Start Command** empty (Docker handles both).
+5. Add [production environment variables](#environment-variables) in the Render dashboard.
+6. On first deploy, set `SEED_ON_STARTUP=true` so migrations run and community seed data loads. Set to `false` after a successful seed to speed up cold starts.
+
+The API auto-runs EF Core migrations on startup. Optional seed runs when `SEED_ON_STARTUP=true`.
+
+### Google OAuth (production)
+
+In Google Cloud Console → Credentials → your Web client:
+
+| Setting | URI |
+|---------|-----|
+| **Authorized redirect URI** | `https://movie-nest-app.onrender.com/signin-google` |
+| **Authorized JavaScript origin** | `https://final-project-ephesian-tggae.vercel.app` |
+
+Keep the local redirect URI (`http://localhost:5102/signin-google`) for development.
+
+### Database note
+
+Production uses **SQLite** at `/var/data/movienest.db` on Render (simpler for a class demo on the free tier). Course materials often recommend PostgreSQL for durable multi-user hosting; Azure was the original plan but DePaul subscription limits led to Render + SQLite instead.
 
 ## Known limitations
 

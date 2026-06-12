@@ -36,4 +36,4 @@ User has many Recommendations
 
 I will be using Google OAuth for my OAuth provider.
 
-I plan to host the frontend on Vercel and Azure for the backend.
+I plan to host the frontend on Vercel and the backend on Render (Docker, .NET 10 API with SQLite).
