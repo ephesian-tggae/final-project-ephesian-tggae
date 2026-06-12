@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using MovieNest.Api.Data;
+using MovieNest.Api.Dtos;
 using MovieNest.Api.Models;
 
 namespace MovieNest.Api.Tests;
@@ -109,6 +110,174 @@ public class ApiIntegrationTests : IClassFixture<MovieNestWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Watchlist_AsSignedInUser_ReturnsSeededItems()
+    {
+        const string userSubject = "test:watchlist-get-user";
+        const string movieTitle = "Seeded Watchlist Movie";
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MovieNestDbContext>();
+            var user = CreateUser(userSubject, "watchlist-get@test.local", "Watchlist Get User");
+            var movie = CreateMovie(99_101, movieTitle, 2015);
+            db.Users.Add(user);
+            db.Movies.Add(movie);
+            await db.SaveChangesAsync();
+
+            db.UserMovies.Add(new UserMovie
+            {
+                UserId = user.Id,
+                MovieId = movie.Id,
+                Status = "watchlist",
+                AddedAt = DateTime.UtcNow,
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = _factory.CreateClient().AsUser(userSubject);
+
+        var response = await client.GetAsync("/api/watchlist");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var items = await response.Content.ReadFromJsonAsync<List<WatchlistItemResponse>>();
+        Assert.NotNull(items);
+        Assert.Contains(items, item => item.Title == movieTitle);
+    }
+
+    [Fact]
+    public async Task Watchlist_PostAsSignedInUser_ReturnsCreated()
+    {
+        const string userSubject = "test:watchlist-post-user";
+        const string movieTitle = "Brand New Watchlist POST Movie";
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MovieNestDbContext>();
+            db.Users.Add(CreateUser(userSubject, "watchlist-post@test.local", "Watchlist Post User"));
+            await db.SaveChangesAsync();
+        }
+
+        using var client = _factory.CreateClient().AsUser(userSubject);
+
+        var response = await client.PostAsJsonAsync(
+            "/api/watchlist",
+            new AddWatchlistRequest(movieTitle, 2012, null, null));
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var created = await response.Content.ReadFromJsonAsync<WatchlistItemResponse>();
+        Assert.NotNull(created);
+        Assert.Equal(movieTitle, created.Title);
+        Assert.Equal("watchlist", created.Status);
+    }
+
+    [Fact]
+    public async Task Reviews_WithoutAuth_ReturnsUnauthorized()
+    {
+        using var client = _factory.CreateClient().AsAnonymous();
+
+        var response = await client.GetAsync("/api/reviews");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PatchWatchlistItem_AsDifferentUser_ReturnsForbidden()
+    {
+        const string userASubject = "test:patch-watchlist-user-a";
+        const string userBSubject = "test:patch-watchlist-user-b";
+        int userAMovieId;
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MovieNestDbContext>();
+            var userA = CreateUser(userASubject, "patch-a@test.local", "Patch User A");
+            var userB = CreateUser(userBSubject, "patch-b@test.local", "Patch User B");
+            var movie = CreateMovie(99_102, "Patch Watchlist Movie", 2018);
+            db.Users.AddRange(userA, userB);
+            db.Movies.Add(movie);
+            await db.SaveChangesAsync();
+
+            var userAMovie = new UserMovie
+            {
+                UserId = userA.Id,
+                MovieId = movie.Id,
+                Status = "watchlist",
+                AddedAt = DateTime.UtcNow,
+            };
+            db.UserMovies.Add(userAMovie);
+            await db.SaveChangesAsync();
+            userAMovieId = userAMovie.Id;
+        }
+
+        using var client = _factory.CreateClient().AsUser(userBSubject);
+
+        var response = await client.PatchAsJsonAsync(
+            $"/api/watchlist/{userAMovieId}",
+            new UpdateWatchlistRequest("watched"));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PatchReview_AsDifferentUser_ReturnsForbidden()
+    {
+        const string userASubject = "test:patch-review-user-a";
+        const string userBSubject = "test:patch-review-user-b";
+        int userAReviewId;
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MovieNestDbContext>();
+            var userA = CreateUser(userASubject, "review-a@test.local", "Review User A");
+            var userB = CreateUser(userBSubject, "review-b@test.local", "Review User B");
+            var movie = CreateMovie(99_103, "Patch Review Movie", 2019);
+            db.Users.AddRange(userA, userB);
+            db.Movies.Add(movie);
+            await db.SaveChangesAsync();
+
+            var review = new Review
+            {
+                UserId = userA.Id,
+                MovieId = movie.Id,
+                Rating = 4,
+                Text = "Great movie",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+            };
+            db.Reviews.Add(review);
+            await db.SaveChangesAsync();
+            userAReviewId = review.Id;
+        }
+
+        using var client = _factory.CreateClient().AsUser(userBSubject);
+
+        var response = await client.PatchAsJsonAsync(
+            $"/api/reviews/{userAReviewId}",
+            new UpdateReviewRequest(5, "Hacked review"));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    private static User CreateUser(string oauthSubjectId, string email, string displayName) =>
+        new()
+        {
+            OAuthSubjectId = oauthSubjectId,
+            Email = email,
+            DisplayName = displayName,
+            JoinedAt = DateTime.UtcNow,
+        };
+
+    private static Movie CreateMovie(int tmdbId, string title, int releaseYear) =>
+        new()
+        {
+            TmdbId = tmdbId,
+            Title = title,
+            ReleaseYear = releaseYear,
+        };
 
     private sealed record HealthResponse(string Status);
 }

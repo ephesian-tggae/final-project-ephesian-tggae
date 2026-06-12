@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MovieNest.Api.Data;
+using MovieNest.Api.Services;
 
 namespace MovieNest.Api.Tests;
 
@@ -46,6 +48,16 @@ public sealed class MovieNestWebApplicationFactory : WebApplicationFactory<Progr
             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
                 TestAuthHandler.AuthenticationSchemeName,
                 _ => { });
+
+            services.RemoveAll<TmdbService>();
+            services.AddSingleton<TmdbService>(sp =>
+            {
+                var http = new HttpClient(new FakeTmdbHttpHandler())
+                {
+                    BaseAddress = new Uri("https://api.themoviedb.org/3/"),
+                };
+                return new TmdbService(http, sp.GetRequiredService<IConfiguration>());
+            });
         });
     }
 
