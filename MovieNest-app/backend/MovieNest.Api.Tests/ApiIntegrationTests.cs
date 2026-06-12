@@ -262,6 +262,44 @@ public class ApiIntegrationTests : IClassFixture<MovieNestWebApplicationFactory>
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
+    [Fact]
+    public async Task History_AsDifferentUser_DoesNotIncludeOtherUsersItems()
+    {
+        const string userASubject = "test:history-user-a";
+        const string userBSubject = "test:history-user-b";
+        const string userAMovieTitle = "User A Watched Movie Only";
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MovieNestDbContext>();
+            var userA = CreateUser(userASubject, "history-a@test.local", "History User A");
+            var userB = CreateUser(userBSubject, "history-b@test.local", "History User B");
+            var movie = CreateMovie(99_104, userAMovieTitle, 2017);
+            db.Users.AddRange(userA, userB);
+            db.Movies.Add(movie);
+            await db.SaveChangesAsync();
+
+            db.UserMovies.Add(new UserMovie
+            {
+                UserId = userA.Id,
+                MovieId = movie.Id,
+                Status = "watched",
+                AddedAt = DateTime.UtcNow,
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = _factory.CreateClient().AsUser(userBSubject);
+
+        var response = await client.GetAsync("/api/history");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var items = await response.Content.ReadFromJsonAsync<List<WatchlistItemResponse>>();
+        Assert.NotNull(items);
+        Assert.DoesNotContain(items, item => item.Title == userAMovieTitle);
+    }
+
     private static User CreateUser(string oauthSubjectId, string email, string displayName) =>
         new()
         {
