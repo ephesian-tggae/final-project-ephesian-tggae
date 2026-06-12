@@ -191,6 +191,44 @@ app.MapPost("/api/auth/logout", async (HttpContext httpContext) =>
     return Results.Ok(new { message = "Logged out" });
 });
 
+if (app.Environment.IsDevelopment()
+    && string.Equals(app.Configuration["E2E_AUTH_ENABLED"], "true", StringComparison.OrdinalIgnoreCase))
+{
+    app.MapPost("/api/auth/e2e-login", async (
+        HttpContext httpContext,
+        UserSyncService userSync,
+        E2ELoginRequest? request) =>
+    {
+        var subjectId = string.IsNullOrWhiteSpace(request?.SubjectId)
+            ? "e2e:test-user"
+            : request.SubjectId.Trim();
+        var email = string.IsNullOrWhiteSpace(request?.Email)
+            ? "e2e-test@movienest.local"
+            : request.Email.Trim();
+        var name = string.IsNullOrWhiteSpace(request?.Name)
+            ? "E2E Test User"
+            : request.Name.Trim();
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, subjectId),
+            new(ClaimTypes.Email, email),
+            new(ClaimTypes.Name, name),
+        };
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        await userSync.SyncFromGooglePrincipalAsync(principal);
+
+        await httpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            new AuthenticationProperties { IsPersistent = true });
+
+        return Results.Ok(new { email, name });
+    });
+}
+
 app.MapGet("/api/me", (ClaimsPrincipal user) =>
     Results.Ok(new
     {

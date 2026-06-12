@@ -122,6 +122,40 @@ App: `http://localhost:5173`
 
 Health check (no login): `http://localhost:5102/api/health`
 
+### End-to-end tests (Playwright)
+
+E2E tests live in `frontend/e2e/` and exercise real signed-in flows against the local API and SQLite database. They use a **development-only** login helper (`POST /api/auth/e2e-login`) — not Google OAuth.
+
+**Prerequisites:** Backend user-secrets configured, `E2E_AUTH_ENABLED=true` in `backend/appsettings.Development.json` (already set for local dev).
+
+**Terminal 1 — API** (`backend/`):
+
+```bash
+dotnet run
+```
+
+**Terminal 2 — React** (`frontend/`):
+
+```bash
+npm run dev
+```
+
+**One-time — install Playwright browser** (`frontend/`):
+
+```bash
+npx playwright install chromium
+```
+
+**Terminal 3 — Playwright** (`frontend/`):
+
+```bash
+npm run test:e2e
+```
+
+Optional env overrides: `PLAYWRIGHT_BASE_URL` (default `http://localhost:5173`), `PLAYWRIGHT_API_URL` (default `http://localhost:5102`).
+
+E2E is intended for **local** runs. CI does not run Playwright by default.
+
 ## Environment variables
 
 | Variable | Where | Description |
@@ -134,6 +168,7 @@ Health check (no login): `http://localhost:5102/api/health`
 | `FrontendUrl` | `backend/appsettings.Development.json` | React URL after OAuth (`http://localhost:5173`) |
 | `Cors:AllowedOrigins` | `backend/appsettings.Development.json` | Allowed frontend origin for cookie auth |
 | `SEED_ON_STARTUP` | Render (optional) | Set to `true` on first deploy to seed community data; set `false` after |
+| `E2E_AUTH_ENABLED` | `backend/appsettings.Development.json` | `true` enables `POST /api/auth/e2e-login` for Playwright (Development only) |
 
 **Production (Render + Vercel)** — set in each host’s dashboard, not in git:
 
