@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchPopularMovies, searchPublicMovies, startLogin } from '../api';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import MovieResultList from '../components/MovieResultList';
 import SearchForm from '../components/SearchForm';
 import StatusMessage from '../components/StatusMessage';
@@ -44,7 +44,35 @@ export default function Discover() {
   }
 
   useEffect(() => {
-    loadPopular();
+    let cancelled = false;
+
+    fetchPopularMovies()
+      .then((data) => {
+        if (cancelled) {
+          return;
+        }
+
+        setMovies(data);
+        setMode('popular');
+        setError(null);
+      })
+      .catch((err) => {
+        if (cancelled) {
+          return;
+        }
+
+        setError(err.message);
+        setMovies([]);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function handleSubmit(event) {

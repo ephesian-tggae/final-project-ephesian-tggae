@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { fetchHistory, fetchRecommendations, fetchReviews, fetchWatchlist } from '../api';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { aggregateGenreCounts, computeAverageRating } from '../utils/dashboardStats';
 import DashboardStatCards from './DashboardStatCards';
 import GenreBarChart from './GenreBarChart';
@@ -10,31 +10,29 @@ import StatusMessage from './StatusMessage';
 
 export default function UserDashboard() {
   const { user } = useAuth();
-  const location = useLocation();
   const [watchlist, setWatchlist] = useState([]);
   const [history, setHistory] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
-  const [recommendationsLoading, setRecommendationsLoading] = useState(false);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(true);
   const [recommendationsError, setRecommendationsError] = useState(null);
   const [recommendationsUnauthorized, setRecommendationsUnauthorized] = useState(false);
 
   useEffect(() => {
     if (!user) {
-      setWatchlist([]);
-      setHistory([]);
-      setReviews([]);
-      setError(null);
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    let cancelled = false;
 
     Promise.all([fetchWatchlist(), fetchHistory(), fetchReviews()])
       .then(([watchlistData, historyData, reviewsData]) => {
+        if (cancelled) {
+          return;
+        }
+
         if (
           watchlistData === null
           || historyData === null
@@ -51,24 +49,35 @@ export default function UserDashboard() {
         setHistory(historyData);
         setReviews(reviewsData);
       })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [user, location.key]);
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
-      setRecommendations([]);
-      setRecommendationsError(null);
-      setRecommendationsUnauthorized(false);
       return;
     }
 
-    setRecommendationsLoading(true);
-    setRecommendationsError(null);
-    setRecommendationsUnauthorized(false);
+    let cancelled = false;
 
     fetchRecommendations()
       .then((data) => {
+        if (cancelled) {
+          return;
+        }
+
         if (data === null) {
           setRecommendations([]);
           setRecommendationsUnauthorized(true);
@@ -78,11 +87,21 @@ export default function UserDashboard() {
         setRecommendations(data);
       })
       .catch((err) => {
-        setRecommendations([]);
-        setRecommendationsError(err.message);
+        if (!cancelled) {
+          setRecommendations([]);
+          setRecommendationsError(err.message);
+        }
       })
-      .finally(() => setRecommendationsLoading(false));
-  }, [user, location.key]);
+      .finally(() => {
+        if (!cancelled) {
+          setRecommendationsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const genreCounts = useMemo(
     () => aggregateGenreCounts([watchlist, history, reviews]),

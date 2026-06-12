@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { addToWatchlist, fetchWatchlist } from '../api';
 
 export function useWatchlistFromResults(isSignedIn) {
@@ -7,26 +7,30 @@ export function useWatchlistFromResults(isSignedIn) {
   const [successMessage, setSuccessMessage] = useState(null);
   const [error, setError] = useState(null);
 
-  const loadWatchlistIds = useCallback(async () => {
-    if (!isSignedIn) {
-      setAddedTmdbIds([]);
-      return;
-    }
-
-    const data = await fetchWatchlist();
-    if (data === null) {
-      return;
-    }
-
-    const ids = data
-      .map((item) => item.tmdbId)
-      .filter((id) => id != null && id > 0);
-    setAddedTmdbIds(ids);
-  }, [isSignedIn]);
-
   useEffect(() => {
-    loadWatchlistIds().catch(() => {});
-  }, [loadWatchlistIds]);
+    if (!isSignedIn) {
+      return;
+    }
+
+    let cancelled = false;
+
+    fetchWatchlist()
+      .then((data) => {
+        if (cancelled || data === null) {
+          return;
+        }
+
+        const ids = data
+          .map((item) => item.tmdbId)
+          .filter((id) => id != null && id > 0);
+        setAddedTmdbIds(ids);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isSignedIn]);
 
   async function handleAddToWatchlist(movie) {
     setAddingTmdbId(movie.tmdbId);
@@ -57,7 +61,7 @@ export function useWatchlistFromResults(isSignedIn) {
   }
 
   return {
-    addedTmdbIds,
+    addedTmdbIds: isSignedIn ? addedTmdbIds : [],
     addingTmdbId,
     successMessage,
     watchlistError: error,

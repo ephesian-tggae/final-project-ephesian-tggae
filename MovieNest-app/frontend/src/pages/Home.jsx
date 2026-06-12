@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { fetchPublicStats, startLogin } from '../api';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import UserDashboard from '../components/UserDashboard';
 import StatusMessage from '../components/StatusMessage';
 
 export default function Home() {
   const { user, error, logout } = useAuth();
+  const location = useLocation();
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [statsError, setStatsError] = useState(null);
@@ -73,7 +74,9 @@ export default function Home() {
         />
       </section>
 
-      <UserDashboard />
+      <UserDashboard
+        key={user ? `${user.email}-${location.key}` : 'signed-out'}
+      />
 
       {user ? (
         <section className="auth-box">

@@ -39,9 +39,36 @@ export default function Reviews() {
   }
 
   useEffect(() => {
-    loadReviews()
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    fetchReviews()
+      .then((data) => {
+        if (cancelled) {
+          return;
+        }
+
+        if (data === null) {
+          setError('Not signed in');
+          setItems([]);
+        } else {
+          setItems(data);
+          setError(null);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function handleChange(field, value) {

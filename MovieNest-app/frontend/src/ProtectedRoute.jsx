@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from './AuthContext';
+import { useAuth } from './hooks/useAuth';
 import StatusMessage from './components/StatusMessage';
 
 export default function ProtectedRoute({ children }) {
