@@ -340,6 +340,20 @@ With the [API and frontend running](#run-locally):
 
 Production uses **Vercel** for the React frontend and **Render** for the .NET API. The API runs in a **Docker** container (see `backend/Dockerfile`) because Render’s native Node runtime does not include the .NET SDK.
 
+### CI/CD and deployment gate
+
+**Push to `main` → GitHub Actions must pass → Vercel / Render auto-deploy**
+
+How changes reach production:
+
+- Pushing or merging to `main` runs [GitHub Actions](https://github.com/features/actions) from [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) at the repo root.
+- **Backend CI:** restore, build, and `dotnet test` (`MovieNest.Api.Tests`).
+- **Frontend CI:** `npm ci`, lint, tests, and build.
+- **Vercel** deploys the frontend from `MovieNest-app/frontend` → [https://final-project-ephesian-tggae.vercel.app](https://final-project-ephesian-tggae.vercel.app)
+- **Render** deploys the backend API from `MovieNest-app/backend` → [https://movie-nest-app.onrender.com](https://movie-nest-app.onrender.com)
+
+Treat **GitHub Actions as the quality gate** before trusting a deployment. Vercel and Render may start a redeploy when code is pushed to GitHub; check that the Actions workflow is green before relying on production.
+
 ### Frontend (Vercel)
 
 1. Import the GitHub repo at [vercel.com](https://vercel.com).
