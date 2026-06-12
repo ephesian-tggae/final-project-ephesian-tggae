@@ -546,3 +546,5 @@ app.MapDelete("/api/reviews/{id:int}", async (
 .RequireAuthorization();
 
 app.Run();
+
+public partial class Program;

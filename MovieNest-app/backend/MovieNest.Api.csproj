@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MovieNest.Api.Tests/**" />
+    <Content Remove="MovieNest.Api.Tests/**" />
+    <None Remove="MovieNest.Api.Tests/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Update="Data\seed-poster-paths.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
