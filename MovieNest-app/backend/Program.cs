@@ -104,6 +104,18 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<MovieNestDbContext>();
+    await db.Database.MigrateAsync();
+
+    if (string.Equals(builder.Configuration["SEED_ON_STARTUP"], "true", StringComparison.OrdinalIgnoreCase))
+    {
+        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+        await seeder.RunAsync(reset: false);
+    }
+}
+
 app.UseForwardedHeaders();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
