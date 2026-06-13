@@ -528,7 +528,7 @@ users, and interaction records. Also checked that dotnet build passed.
 
 ## Prompt :
 
-**Tool:** Cursor
+**Tool:** Cursor 
 **Goal:**
 **Prompt:** "..."
 **Result:**
