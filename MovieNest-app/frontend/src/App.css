@@ -751,11 +751,12 @@ button:focus-visible,
 
 .app-footer a {
   color: var(--mn-accent);
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 .app-footer a:hover {
-  text-decoration: underline;
+  color: var(--mn-accent-hover);
 }
 
 @media (max-width: 520px) {
