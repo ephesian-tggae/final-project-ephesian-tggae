@@ -135,36 +135,45 @@ public class RecommendationService
         Dictionary<string, double> userGenreWeights,
         CancellationToken cancellationToken)
     {
-        var userTopGenres = userGenreWeights
+        var topGenres = userGenreWeights
             .Where(pair => pair.Value > 0)
+            .OrderByDescending(pair => pair.Value)
+            .Take(3)
             .Select(pair => pair.Key)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            .ToList();
 
-        if (userTopGenres.Count == 0)
+        if (topGenres.Count == 0)
         {
             return [];
         }
 
-        var otherUsers = await _db.Users
-            .Where(u => u.Id != userId)
-            .Select(u => u.Id)
+        // Match seeded community users by shared genres in two queries (not one scan per user).
+        // The old per-user loop timed out on Render when ~500 seed users were present.
+        const int maxSimilarUsers = 50;
+
+        var shelfMatches = await _db.UserMovies
+            .AsNoTracking()
+            .Where(um =>
+                um.UserId != userId
+                && um.User.OAuthSubjectId.StartsWith(DatabaseSeeder.SeedUserPrefix)
+                && um.Movie.MovieGenres.Any(mg => topGenres.Contains(mg.Genre.Name)))
+            .Select(um => um.UserId)
+            .Distinct()
+            .Take(maxSimilarUsers)
             .ToListAsync(cancellationToken);
 
-        var similarUserIds = new HashSet<int>();
+        var reviewMatches = await _db.Reviews
+            .AsNoTracking()
+            .Where(r =>
+                r.UserId != userId
+                && r.User.OAuthSubjectId.StartsWith(DatabaseSeeder.SeedUserPrefix)
+                && r.Movie.MovieGenres.Any(mg => topGenres.Contains(mg.Genre.Name)))
+            .Select(r => r.UserId)
+            .Distinct()
+            .Take(maxSimilarUsers)
+            .ToListAsync(cancellationToken);
 
-        foreach (var otherUserId in otherUsers)
-        {
-            var otherWeights = await BuildUserGenreWeightsAsync(otherUserId, cancellationToken);
-            var overlap = otherWeights.Keys.Count(
-                genre => userTopGenres.Contains(genre) && otherWeights[genre] > 0);
-
-            if (overlap > 0)
-            {
-                similarUserIds.Add(otherUserId);
-            }
-        }
-
-        return similarUserIds;
+        return shelfMatches.Concat(reviewMatches).ToHashSet();
     }
 
     private async Task<Dictionary<int, CommunityMovieStats>> BuildCommunityStatsAsync(
